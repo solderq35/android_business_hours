@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.marsphotos.ui.screens
+package com.example.businesshours.ui.screens
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,42 +24,43 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.marsphotos.MarsPhotosApplication
-import com.example.marsphotos.data.LocationRepository
-import com.example.marsphotos.model.LocationData
+import com.example.businesshours.BusinessHoursApplication
+import com.example.businesshours.data.BusinessHoursRepository
+import com.example.businesshours.model.BusinessHoursData
 import java.io.IOException
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
 /** UI state for the Home screen */
 sealed interface MarsUiState {
-    data class Success(val photos: List<LocationData>) : MarsUiState
+    data class Success(val photos: List<BusinessHoursData>) : MarsUiState
 
     object Error : MarsUiState
 
     object Loading : MarsUiState
 }
 
-class MarsViewModel(private val locationRepository: LocationRepository) : ViewModel() {
+class BusinessHoursViewModel(private val businessHoursRepository: BusinessHoursRepository) :
+    ViewModel() {
     /** The mutable State that stores the status of the most recent request */
     var marsUiState: MarsUiState by mutableStateOf(MarsUiState.Loading)
         private set
 
     /** Call getMarsPhotos() on init so we can display status immediately. */
     init {
-        getMarsPhotos()
+        getBusinessHours()
     }
 
     /**
      * Gets Mars photos information from the Mars API Retrofit service and updates the [MarsPhoto]
      * [List] [MutableList].
      */
-    fun getMarsPhotos() {
+    fun getBusinessHours() {
         viewModelScope.launch {
             marsUiState = MarsUiState.Loading
             marsUiState =
                 try {
-                    MarsUiState.Success(locationRepository.getMarsPhotos())
+                    MarsUiState.Success(businessHoursRepository.getBusinessHours())
                 } catch (e: IOException) {
                     MarsUiState.Error
                 } catch (e: HttpException) {
@@ -68,13 +69,13 @@ class MarsViewModel(private val locationRepository: LocationRepository) : ViewMo
         }
     }
 
-    /** Factory for [MarsViewModel] that takes [LocationRepository] as a dependency */
+    /** Factory for [BusinessHoursViewModel] that takes [BusinessHoursRepository] as a dependency */
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                val application = (this[APPLICATION_KEY] as MarsPhotosApplication)
-                val marsPhotosRepository = application.container.locationRepository
-                MarsViewModel(locationRepository = marsPhotosRepository)
+                val application = (this[APPLICATION_KEY] as BusinessHoursApplication)
+                val businessHoursRepository = application.container.businessHoursRepository
+                BusinessHoursViewModel(businessHoursRepository = businessHoursRepository)
             }
         }
     }

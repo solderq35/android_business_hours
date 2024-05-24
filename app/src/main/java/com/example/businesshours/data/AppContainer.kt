@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.marsphotos.data
+package com.example.businesshours.data
 
-import com.example.marsphotos.network.LocationApiService
+import com.example.businesshours.network.BusinessHoursApiService
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -23,7 +23,7 @@ import retrofit2.Retrofit
 
 /** Dependency Injection container at the application level. */
 interface AppContainer {
-    val locationRepository: LocationRepository
+    val businessHoursRepository: BusinessHoursRepository
 }
 
 /**
@@ -44,12 +44,12 @@ class DefaultAppContainer : AppContainer {
             .build()
 
     /** Retrofit service object for creating api calls */
-    private val retrofitService: LocationApiService by lazy {
-        retrofit.create(LocationApiService::class.java)
+    private val retrofitService: BusinessHoursApiService by lazy {
+        retrofit.create(BusinessHoursApiService::class.java)
     }
 
     /** DI implementation for Mars photos repository */
-    override val locationRepository: LocationRepository by lazy {
-        NetworkLocationRepository(retrofitService)
+    override val businessHoursRepository: BusinessHoursRepository by lazy {
+        NetworkBusinessHoursRepository(retrofitService)
     }
 }

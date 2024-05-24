@@ -13,24 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.example.businesshours.fake
 
-package com.example.marsphotos.ui.theme
+import com.example.businesshours.model.BusinessHoursData
 
-import androidx.compose.material3.Typography
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
+object FakeDataSource {
 
-// Set of Material typography styles to start with
-val Typography =
-    Typography(
-        bodyLarge =
-            TextStyle(
-                fontFamily = FontFamily.Default,
-                fontWeight = FontWeight.Normal,
-                fontSize = 16.sp,
-                lineHeight = 24.sp,
-                letterSpacing = 0.5.sp
-            )
-    )
+    private const val idOne = "img1"
+    private const val idTwo = "img2"
+    private const val imgOne = "url.one"
+    private const val imgTwo = "url.two"
+    val photosList =
+        listOf(
+            BusinessHoursData(id = idOne, imgSrc = imgOne),
+            BusinessHoursData(id = idTwo, imgSrc = imgTwo)
+        )
+}

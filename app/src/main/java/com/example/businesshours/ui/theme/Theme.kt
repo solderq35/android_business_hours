@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.marsphotos.ui.theme
+package com.example.businesshours.ui.theme
 
 import android.app.Activity
 import android.os.Build
@@ -38,7 +38,7 @@ private val LightColorScheme =
     lightColorScheme(primary = Purple40, secondary = PurpleGrey40, tertiary = Pink40)
 
 @Composable
-fun MarsPhotosTheme(
+fun BusinessHoursTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     // Dynamic color in this app is turned off for learning purposes

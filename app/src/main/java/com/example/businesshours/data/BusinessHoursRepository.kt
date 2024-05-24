@@ -13,24 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.marsphotos.data
+package com.example.businesshours.data
 
 import android.util.Log
-import com.example.marsphotos.model.LocationData
-import com.example.marsphotos.network.LocationApiService
+import com.example.businesshours.model.BusinessHoursData
+import com.example.businesshours.network.BusinessHoursApiService
 
 /** Repository that fetch mars photos list from marsApi. */
-interface LocationRepository {
+interface BusinessHoursRepository {
     /** Fetches list of MarsPhoto from marsApi */
-    suspend fun getMarsPhotos(): List<LocationData>
+    suspend fun getBusinessHours(): List<BusinessHoursData>
 }
 
 /** Network Implementation of Repository that fetch mars photos list from marsApi. */
-class NetworkLocationRepository(private val locationApiService: LocationApiService) :
-    LocationRepository {
+class NetworkBusinessHoursRepository(private val businessHoursApiService: BusinessHoursApiService) :
+    BusinessHoursRepository {
     /** Fetches list of MarsPhoto from marsApi */
-    override suspend fun getMarsPhotos(): List<LocationData> {
-        val response = locationApiService.getPhotos()
+    override suspend fun getBusinessHours(): List<BusinessHoursData> {
+        val response = businessHoursApiService.getBusinessHoursData()
         // Log the response
         Log.d("MarsPhotosRepository", "API Response: $response")
         return response

@@ -13,18 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.marsphotos
 
-import android.app.Application
-import com.example.marsphotos.data.AppContainer
-import com.example.marsphotos.data.DefaultAppContainer
+package com.example.businesshours.ui.theme
 
-class MarsPhotosApplication : Application() {
-    /** AppContainer instance used by the rest of classes to obtain dependencies */
-    lateinit var container: AppContainer
+import androidx.compose.material3.Typography
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 
-    override fun onCreate() {
-        super.onCreate()
-        container = DefaultAppContainer()
-    }
-}
+// Set of Material typography styles to start with
+val Typography =
+    Typography(
+        bodyLarge =
+            TextStyle(
+                fontFamily = FontFamily.Default,
+                fontWeight = FontWeight.Normal,
+                fontSize = 16.sp,
+                lineHeight = 24.sp,
+                letterSpacing = 0.5.sp
+            )
+    )

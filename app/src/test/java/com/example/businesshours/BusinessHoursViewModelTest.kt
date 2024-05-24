@@ -13,25 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.marsphotos
+package com.example.businesshours
 
-import com.example.marsphotos.fake.FakeDataSource
-import com.example.marsphotos.fake.FakeNetworkLocationRepository
-import com.example.marsphotos.rules.TestDispatcherRule
-import com.example.marsphotos.ui.screens.MarsUiState
-import com.example.marsphotos.ui.screens.MarsViewModel
+import com.example.businesshours.fake.FakeDataSource
+import com.example.businesshours.fake.FakeNetworkBusinessHoursRepository
+import com.example.businesshours.rules.TestDispatcherRule
+import com.example.businesshours.ui.screens.BusinessHoursViewModel
+import com.example.businesshours.ui.screens.MarsUiState
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 
-class MarsViewModelTest {
+class BusinessHoursViewModelTest {
 
     @get:Rule val testDispatcher = TestDispatcherRule()
 
     @Test
-    fun marsViewModel_getMarsPhotos_verifyMarsUiStateSuccess() = runTest {
-        val marsViewModel = MarsViewModel(locationRepository = FakeNetworkLocationRepository())
-        assertEquals(MarsUiState.Success(FakeDataSource.photosList), marsViewModel.marsUiState)
+    fun businessHoursViewModel_getBusinessHours_verifyBusinessHoursUiStateSuccess() = runTest {
+        val businessHoursViewModel =
+            BusinessHoursViewModel(businessHoursRepository = FakeNetworkBusinessHoursRepository())
+        assertEquals(
+            MarsUiState.Success(FakeDataSource.photosList),
+            businessHoursViewModel.marsUiState
+        )
     }
 }

@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.example.businesshours.fake
 
-package com.example.marsphotos.model
+import com.example.businesshours.model.BusinessHoursData
+import com.example.businesshours.network.BusinessHoursApiService
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
-
-/** This data class defines a Mars photo which includes an ID, and the image URL. */
-@Serializable
-data class LocationData(val id: String, @SerialName(value = "img_src") val imgSrc: String)
+class FakeBusinessHoursApiService : BusinessHoursApiService {
+    override suspend fun getBusinessHoursData(): List<BusinessHoursData> {
+        return FakeDataSource.photosList
+    }
+}

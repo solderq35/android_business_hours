@@ -19,7 +19,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:name=".MarsPhotosApplication"
+        android:name="com.example.businesshours.BusinessHoursApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -28,7 +28,7 @@
         android:theme="@style/Theme.MarsPhotos"
         tools:targetApi="33">
         <activity
-            android:name=".MainActivity"
+            android:name="com.example.businesshours.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.MarsPhotos">

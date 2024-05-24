@@ -13,20 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.marsphotos
 
-import com.example.marsphotos.data.NetworkLocationRepository
-import com.example.marsphotos.fake.FakeDataSource
-import com.example.marsphotos.fake.FakeLocationApiService
-import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Test
+package com.example.businesshours.ui.theme
 
-class NetworkMarsRepositoryTest {
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Shapes
+import androidx.compose.ui.unit.dp
 
-    @Test
-    fun networkMarsPhotosRepository_getMarsPhotos_verifyPhotoList() = runTest {
-        val repository = NetworkLocationRepository(locationApiService = FakeLocationApiService())
-        assertEquals(FakeDataSource.photosList, repository.getMarsPhotos())
-    }
-}
+val Shapes =
+    Shapes(
+        small = RoundedCornerShape(4.dp),
+        medium = RoundedCornerShape(16.dp),
+    )

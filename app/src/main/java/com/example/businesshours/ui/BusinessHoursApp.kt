@@ -16,7 +16,7 @@
 
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.example.marsphotos.ui
+package com.example.businesshours.ui
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -32,22 +32,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.businesshours.ui.screens.BusinessHoursViewModel
+import com.example.businesshours.ui.screens.HomeScreen
 import com.example.marsphotos.R
-import com.example.marsphotos.ui.screens.HomeScreen
-import com.example.marsphotos.ui.screens.MarsViewModel
 
 @Composable
-fun MarsPhotosApp() {
+fun BusinessHoursApp() {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = { MarsTopAppBar(scrollBehavior = scrollBehavior) }
+        topBar = { BusinessHoursTopAppBar(scrollBehavior = scrollBehavior) }
     ) {
         Surface(modifier = Modifier.fillMaxSize()) {
-            val marsViewModel: MarsViewModel = viewModel(factory = MarsViewModel.Factory)
+            val businessHoursViewModel: BusinessHoursViewModel =
+                viewModel(factory = BusinessHoursViewModel.Factory)
             HomeScreen(
-                marsUiState = marsViewModel.marsUiState,
-                retryAction = marsViewModel::getMarsPhotos,
+                marsUiState = businessHoursViewModel.marsUiState,
+                retryAction = businessHoursViewModel::getBusinessHours,
                 contentPadding = it
             )
         }
@@ -55,7 +56,7 @@ fun MarsPhotosApp() {
 }
 
 @Composable
-fun MarsTopAppBar(scrollBehavior: TopAppBarScrollBehavior, modifier: Modifier = Modifier) {
+fun BusinessHoursTopAppBar(scrollBehavior: TopAppBarScrollBehavior, modifier: Modifier = Modifier) {
     CenterAlignedTopAppBar(
         scrollBehavior = scrollBehavior,
         title = {
