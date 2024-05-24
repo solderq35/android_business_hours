@@ -15,7 +15,7 @@
  */
 package com.example.marsphotos.data
 
-import com.example.marsphotos.network.MarsApiService
+import com.example.marsphotos.network.LocationApiService
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -23,7 +23,7 @@ import retrofit2.Retrofit
 
 /** Dependency Injection container at the application level. */
 interface AppContainer {
-    val marsPhotosRepository: MarsPhotosRepository
+    val locationRepository: LocationRepository
 }
 
 /**
@@ -44,12 +44,12 @@ class DefaultAppContainer : AppContainer {
             .build()
 
     /** Retrofit service object for creating api calls */
-    private val retrofitService: MarsApiService by lazy {
-        retrofit.create(MarsApiService::class.java)
+    private val retrofitService: LocationApiService by lazy {
+        retrofit.create(LocationApiService::class.java)
     }
 
     /** DI implementation for Mars photos repository */
-    override val marsPhotosRepository: MarsPhotosRepository by lazy {
-        NetworkMarsPhotosRepository(retrofitService)
+    override val locationRepository: LocationRepository by lazy {
+        NetworkLocationRepository(retrofitService)
     }
 }

@@ -15,9 +15,9 @@
  */
 package com.example.marsphotos
 
-import com.example.marsphotos.data.NetworkMarsPhotosRepository
+import com.example.marsphotos.data.NetworkLocationRepository
 import com.example.marsphotos.fake.FakeDataSource
-import com.example.marsphotos.fake.FakeMarsApiService
+import com.example.marsphotos.fake.FakeLocationApiService
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -26,7 +26,7 @@ class NetworkMarsRepositoryTest {
 
     @Test
     fun networkMarsPhotosRepository_getMarsPhotos_verifyPhotoList() = runTest {
-        val repository = NetworkMarsPhotosRepository(marsApiService = FakeMarsApiService())
+        val repository = NetworkLocationRepository(locationApiService = FakeLocationApiService())
         assertEquals(FakeDataSource.photosList, repository.getMarsPhotos())
     }
 }

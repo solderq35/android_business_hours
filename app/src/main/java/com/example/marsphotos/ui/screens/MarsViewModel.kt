@@ -25,7 +25,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.marsphotos.MarsPhotosApplication
-import com.example.marsphotos.data.MarsPhotosRepository
+import com.example.marsphotos.data.LocationRepository
 import com.example.marsphotos.model.LocationData
 import java.io.IOException
 import kotlinx.coroutines.launch
@@ -40,7 +40,7 @@ sealed interface MarsUiState {
     object Loading : MarsUiState
 }
 
-class MarsViewModel(private val marsPhotosRepository: MarsPhotosRepository) : ViewModel() {
+class MarsViewModel(private val locationRepository: LocationRepository) : ViewModel() {
     /** The mutable State that stores the status of the most recent request */
     var marsUiState: MarsUiState by mutableStateOf(MarsUiState.Loading)
         private set
@@ -59,7 +59,7 @@ class MarsViewModel(private val marsPhotosRepository: MarsPhotosRepository) : Vi
             marsUiState = MarsUiState.Loading
             marsUiState =
                 try {
-                    MarsUiState.Success(marsPhotosRepository.getMarsPhotos())
+                    MarsUiState.Success(locationRepository.getMarsPhotos())
                 } catch (e: IOException) {
                     MarsUiState.Error
                 } catch (e: HttpException) {
@@ -68,13 +68,13 @@ class MarsViewModel(private val marsPhotosRepository: MarsPhotosRepository) : Vi
         }
     }
 
-    /** Factory for [MarsViewModel] that takes [MarsPhotosRepository] as a dependency */
+    /** Factory for [MarsViewModel] that takes [LocationRepository] as a dependency */
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val application = (this[APPLICATION_KEY] as MarsPhotosApplication)
-                val marsPhotosRepository = application.container.marsPhotosRepository
-                MarsViewModel(marsPhotosRepository = marsPhotosRepository)
+                val marsPhotosRepository = application.container.locationRepository
+                MarsViewModel(locationRepository = marsPhotosRepository)
             }
         }
     }

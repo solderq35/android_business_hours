@@ -16,7 +16,7 @@
 package com.example.marsphotos
 
 import com.example.marsphotos.fake.FakeDataSource
-import com.example.marsphotos.fake.FakeNetworkMarsPhotosRepository
+import com.example.marsphotos.fake.FakeNetworkLocationRepository
 import com.example.marsphotos.rules.TestDispatcherRule
 import com.example.marsphotos.ui.screens.MarsUiState
 import com.example.marsphotos.ui.screens.MarsViewModel
@@ -31,7 +31,7 @@ class MarsViewModelTest {
 
     @Test
     fun marsViewModel_getMarsPhotos_verifyMarsUiStateSuccess() = runTest {
-        val marsViewModel = MarsViewModel(marsPhotosRepository = FakeNetworkMarsPhotosRepository())
+        val marsViewModel = MarsViewModel(locationRepository = FakeNetworkLocationRepository())
         assertEquals(MarsUiState.Success(FakeDataSource.photosList), marsViewModel.marsUiState)
     }
 }
