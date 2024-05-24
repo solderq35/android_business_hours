@@ -27,18 +27,11 @@ import org.junit.Test
 
 class MarsViewModelTest {
 
-    @get:Rule
-    val testDispatcher = TestDispatcherRule()
+    @get:Rule val testDispatcher = TestDispatcherRule()
 
     @Test
-    fun marsViewModel_getMarsPhotos_verifyMarsUiStateSuccess() =
-        runTest {
-            val marsViewModel = MarsViewModel(
-                marsPhotosRepository = FakeNetworkMarsPhotosRepository()
-            )
-            assertEquals(
-                MarsUiState.Success(FakeDataSource.photosList),
-                marsViewModel.marsUiState
-            )
-        }
+    fun marsViewModel_getMarsPhotos_verifyMarsUiStateSuccess() = runTest {
+        val marsViewModel = MarsViewModel(marsPhotosRepository = FakeNetworkMarsPhotosRepository())
+        assertEquals(MarsUiState.Success(FakeDataSource.photosList), marsViewModel.marsUiState)
+    }
 }

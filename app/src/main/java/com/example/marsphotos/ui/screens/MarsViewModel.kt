@@ -27,16 +27,16 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.marsphotos.MarsPhotosApplication
 import com.example.marsphotos.data.MarsPhotosRepository
 import com.example.marsphotos.model.MarsPhoto
+import java.io.IOException
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
-import java.io.IOException
 
-/**
- * UI state for the Home screen
- */
+/** UI state for the Home screen */
 sealed interface MarsUiState {
     data class Success(val photos: List<MarsPhoto>) : MarsUiState
+
     object Error : MarsUiState
+
     object Loading : MarsUiState
 }
 
@@ -45,33 +45,30 @@ class MarsViewModel(private val marsPhotosRepository: MarsPhotosRepository) : Vi
     var marsUiState: MarsUiState by mutableStateOf(MarsUiState.Loading)
         private set
 
-    /**
-     * Call getMarsPhotos() on init so we can display status immediately.
-     */
+    /** Call getMarsPhotos() on init so we can display status immediately. */
     init {
         getMarsPhotos()
     }
 
     /**
-     * Gets Mars photos information from the Mars API Retrofit service and updates the
-     * [MarsPhoto] [List] [MutableList].
+     * Gets Mars photos information from the Mars API Retrofit service and updates the [MarsPhoto]
+     * [List] [MutableList].
      */
     fun getMarsPhotos() {
         viewModelScope.launch {
             marsUiState = MarsUiState.Loading
-            marsUiState = try {
-                MarsUiState.Success(marsPhotosRepository.getMarsPhotos())
-            } catch (e: IOException) {
-                MarsUiState.Error
-            } catch (e: HttpException) {
-                MarsUiState.Error
-            }
+            marsUiState =
+                try {
+                    MarsUiState.Success(marsPhotosRepository.getMarsPhotos())
+                } catch (e: IOException) {
+                    MarsUiState.Error
+                } catch (e: HttpException) {
+                    MarsUiState.Error
+                }
         }
     }
 
-    /**
-     * Factory for [MarsViewModel] that takes [MarsPhotosRepository] as a dependency
-     */
+    /** Factory for [MarsViewModel] that takes [MarsPhotosRepository] as a dependency */
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {

@@ -34,3 +34,6 @@ proguard-project.txt
 # Android Studio/IDEA
 *.iml
 .idea
+
+# Kotlin formatter
+ktfmt-0.47-jar-with-dependencies.jar
