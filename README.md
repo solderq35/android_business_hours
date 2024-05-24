@@ -10,7 +10,7 @@
 - Open up Android Studio as well to actually compile the app onto the emulator (Shift + F10)
 - Formatting:
   - `java -jar ktfmt-0.47-jar-with-dependencies.jar --kotlinlang-style <full path to project>`
-    - Example: `java -jar ktfmt-0.47-jar-with-dependencies.jar --kotlinlang-style "C:\Users\solde\AndroidStudioProjects\android_restaurant_hours"`
+    - Example: `java -jar ktfmt-0.47-jar-with-dependencies.jar --kotlinlang-style "C:\Users\solde\AndroidStudioProjects\android_business_hours"`
     - Download kfmt v0.47 from https://github.com/facebook/ktfmt/releases, put it in the root directory of this repo (this file is in `.gitignore` due to large file size)
 
 ## Assumptions
@@ -24,4 +24,4 @@
 - local timezone on user matches server
 - am pm final format (confirmed by figma)
 - match actual restaurant business hours format for end user (needs market research)
-  - see: superette corvallis on google maps mobile (e.g. "8 am to 2 am")
+  - see: Superette corvallis on google maps mobile (e.g. "8 am to 2 am")
