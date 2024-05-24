@@ -40,7 +40,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.marsphotos.R
-import com.example.marsphotos.model.MarsPhoto
+import com.example.marsphotos.model.LocationData
 import com.example.marsphotos.ui.theme.MarsPhotosTheme
 
 @Composable
@@ -92,7 +92,7 @@ fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
 /** The home screen displaying photo grid. */
 @Composable
 fun PhotosGridScreen(
-    photos: List<MarsPhoto>,
+    photos: List<LocationData>,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
@@ -108,7 +108,7 @@ fun PhotosGridScreen(
 }
 
 @Composable
-fun MarsPhotoCard(photo: MarsPhoto, modifier: Modifier = Modifier) {
+fun MarsPhotoCard(photo: LocationData, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier,
         shape = MaterialTheme.shapes.medium,
@@ -139,7 +139,7 @@ fun ErrorScreenPreview() {
 @Composable
 fun PhotosGridScreenPreview() {
     MarsPhotosTheme {
-        val mockData = List(10) { MarsPhoto("$it", "") }
+        val mockData = List(10) { LocationData("$it", "") }
         PhotosGridScreen(mockData)
     }
 }

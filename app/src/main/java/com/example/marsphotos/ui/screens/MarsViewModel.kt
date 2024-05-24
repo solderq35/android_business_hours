@@ -26,14 +26,14 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.marsphotos.MarsPhotosApplication
 import com.example.marsphotos.data.MarsPhotosRepository
-import com.example.marsphotos.model.MarsPhoto
+import com.example.marsphotos.model.LocationData
 import java.io.IOException
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
 /** UI state for the Home screen */
 sealed interface MarsUiState {
-    data class Success(val photos: List<MarsPhoto>) : MarsUiState
+    data class Success(val photos: List<LocationData>) : MarsUiState
 
     object Error : MarsUiState
 

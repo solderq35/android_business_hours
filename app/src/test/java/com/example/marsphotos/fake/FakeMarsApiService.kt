@@ -15,11 +15,11 @@
  */
 package com.example.marsphotos.fake
 
-import com.example.marsphotos.model.MarsPhoto
+import com.example.marsphotos.model.LocationData
 import com.example.marsphotos.network.MarsApiService
 
 class FakeMarsApiService : MarsApiService {
-    override suspend fun getPhotos(): List<MarsPhoto> {
+    override suspend fun getPhotos(): List<LocationData> {
         return FakeDataSource.photosList
     }
 }
