@@ -56,16 +56,17 @@ fun HomeScreen(
 ) {
     when (marsUiState) {
         is MarsUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
-        is MarsUiState.Success -> PhotosGridScreen(
-            marsUiState.photos, contentPadding = contentPadding, modifier = modifier.fillMaxWidth()
-        )
+        is MarsUiState.Success ->
+            PhotosGridScreen(
+                marsUiState.photos,
+                contentPadding = contentPadding,
+                modifier = modifier.fillMaxWidth()
+            )
         is MarsUiState.Error -> ErrorScreen(retryAction, modifier = modifier.fillMaxSize())
     }
 }
 
-/**
- * The home screen displaying the loading message.
- */
+/** The home screen displaying the loading message. */
 @Composable
 fun LoadingScreen(modifier: Modifier = Modifier) {
     Image(
@@ -75,9 +76,7 @@ fun LoadingScreen(modifier: Modifier = Modifier) {
     )
 }
 
-/**
- * The home screen displaying error message with re-attempt button.
- */
+/** The home screen displaying error message with re-attempt button. */
 @Composable
 fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
     Column(
@@ -86,18 +85,15 @@ fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
-            painter = painterResource(id = R.drawable.ic_connection_error), contentDescription = ""
+            painter = painterResource(id = R.drawable.ic_connection_error),
+            contentDescription = ""
         )
         Text(text = stringResource(R.string.loading_failed), modifier = Modifier.padding(16.dp))
-        Button(onClick = retryAction) {
-            Text(stringResource(R.string.retry))
-        }
+        Button(onClick = retryAction) { Text(stringResource(R.string.retry)) }
     }
 }
 
-/**
- * The home screen displaying photo grid.
- */
+/** The home screen displaying photo grid. */
 @Composable
 fun PhotosGridScreen(
     photos: List<MarsPhoto>,
@@ -110,13 +106,7 @@ fun PhotosGridScreen(
         contentPadding = contentPadding,
     ) {
         items(items = photos, key = { photo -> photo.id }) { photo ->
-            MarsPhotoCard(
-                photo,
-                modifier = modifier
-                    .padding(4.dp)
-                    .fillMaxWidth()
-                    .aspectRatio(1.5f)
-            )
+            MarsPhotoCard(photo, modifier = modifier.padding(4.dp).fillMaxWidth().aspectRatio(1.5f))
         }
     }
 }
@@ -129,8 +119,11 @@ fun MarsPhotoCard(photo: MarsPhoto, modifier: Modifier = Modifier) {
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         AsyncImage(
-            model = ImageRequest.Builder(context = LocalContext.current).data(photo.imgSrc) // change from image card to text string HERE
-                .crossfade(true).build(),
+            model =
+                ImageRequest.Builder(context = LocalContext.current)
+                    .data(photo.imgSrc) // change from image card to text string HERE
+                    .crossfade(true)
+                    .build(),
             error = painterResource(R.drawable.ic_broken_image),
             placeholder = painterResource(R.drawable.loading_img),
             contentDescription = stringResource(R.string.mars_photo),
@@ -143,17 +136,13 @@ fun MarsPhotoCard(photo: MarsPhoto, modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun LoadingScreenPreview() {
-    MarsPhotosTheme {
-        LoadingScreen()
-    }
+    MarsPhotosTheme { LoadingScreen() }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun ErrorScreenPreview() {
-    MarsPhotosTheme {
-        ErrorScreen({})
-    }
+    MarsPhotosTheme { ErrorScreen({}) }
 }
 
 @Preview(showBackground = true)
