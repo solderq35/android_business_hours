@@ -39,9 +39,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.businesshours.R
 import com.example.businesshours.model.Hour
 import com.example.businesshours.ui.theme.BusinessHoursTheme
-import com.example.businesshours.R
 
 @Composable
 fun HomeScreen(
@@ -89,7 +89,7 @@ fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
     }
 }
 
-/** The home screen displaying photo grid. */
+/** The home screen displaying hours grid. */
 @Composable
 fun BusinessHoursGridScreen(
     hours: List<Hour>,

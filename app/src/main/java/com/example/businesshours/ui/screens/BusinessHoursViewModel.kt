@@ -46,15 +46,12 @@ class BusinessHoursViewModel(private val businessHoursRepository: BusinessHoursR
     var businessHoursUiState: BusinessHoursUiState by mutableStateOf(BusinessHoursUiState.Loading)
         private set
 
-    /** Call getMarsPhotos() on init so we can display status immediately. */
+    /** Call getBusinessHours() on init so we can display status immediately. */
     init {
         getBusinessHours()
     }
 
-    /**
-     * Gets Mars photos information from the Mars API Retrofit service and updates the [MarsPhoto]
-     * [List] [MutableList].
-     */
+    /** Gets Business Hours information from BusinessHoursApiService */
     fun getBusinessHours() {
         viewModelScope.launch {
             businessHoursUiState = BusinessHoursUiState.Loading
