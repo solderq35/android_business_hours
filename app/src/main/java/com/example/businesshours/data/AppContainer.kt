@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.marsphotos.data
+package com.example.businesshours.data
 
-import com.example.marsphotos.network.MarsApiService
+import com.example.businesshours.network.BusinessHoursApiService
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -23,7 +23,7 @@ import retrofit2.Retrofit
 
 /** Dependency Injection container at the application level. */
 interface AppContainer {
-    val marsPhotosRepository: MarsPhotosRepository
+    val businessHoursRepository: BusinessHoursRepository
 }
 
 /**
@@ -32,7 +32,7 @@ interface AppContainer {
  * Variables are initialized lazily and the same instance is shared across the whole app.
  */
 class DefaultAppContainer : AppContainer {
-    private val baseUrl = "https://android-kotlin-fun-mars-server.appspot.com/"
+    private val baseUrl = "https://purs-demo-bucket-test.s3.us-west-2.amazonaws.com/"
 
     /**
      * Use the Retrofit builder to build a retrofit object using a kotlinx.serialization converter
@@ -43,13 +43,13 @@ class DefaultAppContainer : AppContainer {
             .baseUrl(baseUrl)
             .build()
 
-    /** Retrofit service object for creating api calls */
-    private val retrofitService: MarsApiService by lazy {
-        retrofit.create(MarsApiService::class.java)
+    /** Retrofit service object for creating API calls */
+    private val retrofitService: BusinessHoursApiService by lazy {
+        retrofit.create(BusinessHoursApiService::class.java)
     }
 
-    /** DI implementation for Mars photos repository */
-    override val marsPhotosRepository: MarsPhotosRepository by lazy {
-        NetworkMarsPhotosRepository(retrofitService)
+    /** DI implementation for business hours repository */
+    override val businessHoursRepository: BusinessHoursRepository by lazy {
+        NetworkBusinessHoursRepository(retrofitService)
     }
 }

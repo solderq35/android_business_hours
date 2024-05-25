@@ -14,16 +14,23 @@
  * limitations under the License.
  */
 
-package com.example.marsphotos.network
+package com.example.businesshours.ui.theme
 
-import com.example.marsphotos.model.MarsPhoto
-import retrofit2.http.GET
+import androidx.compose.material3.Typography
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 
-/** A public interface that exposes the [getPhotos] method */
-interface MarsApiService {
-    /**
-     * Returns a [List] of [MarsPhoto] and this method can be called from a Coroutine. The @GET
-     * annotation indicates that the "photos" endpoint will be requested with the GET HTTP method
-     */
-    @GET("photos") suspend fun getPhotos(): List<MarsPhoto>
-}
+// Set of Material typography styles to start with
+val Typography =
+    Typography(
+        bodyLarge =
+            TextStyle(
+                fontFamily = FontFamily.Default,
+                fontWeight = FontWeight.Normal,
+                fontSize = 16.sp,
+                lineHeight = 24.sp,
+                letterSpacing = 0.5.sp
+            )
+    )

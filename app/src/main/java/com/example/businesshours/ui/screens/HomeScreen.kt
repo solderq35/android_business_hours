@@ -13,15 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.marsphotos.ui.screens
+package com.example.businesshours.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -35,34 +37,39 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
-import com.example.marsphotos.R
-import com.example.marsphotos.model.MarsPhoto
-import com.example.marsphotos.ui.theme.MarsPhotosTheme
+import com.example.businesshours.R
+import com.example.businesshours.model.BusinessHoursResponse
+import com.example.businesshours.model.Hour
+import com.example.businesshours.ui.theme.BusinessHoursTheme
 
 @Composable
 fun HomeScreen(
-    marsUiState: MarsUiState,
+    businessHoursUiState: BusinessHoursUiState,
     retryAction: () -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
-    when (marsUiState) {
-        is MarsUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
-        is MarsUiState.Success ->
-            PhotosGridScreen(
-                marsUiState.photos,
-                contentPadding = contentPadding,
-                modifier = modifier.fillMaxWidth()
-            )
-        is MarsUiState.Error -> ErrorScreen(retryAction, modifier = modifier.fillMaxSize())
+    when (businessHoursUiState) {
+        is BusinessHoursUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
+        is BusinessHoursUiState.Success -> {
+            Column {
+                Spacer(modifier = modifier.height(16.dp))
+                businessNameHeader(
+                    businessHoursUiState.response,
+                    modifier = modifier.padding(16.dp)
+                )
+                BusinessHoursGridScreen(
+                    businessHoursUiState.response,
+                    contentPadding = contentPadding,
+                    modifier = modifier.fillMaxWidth()
+                )
+            }
+        }
+        is BusinessHoursUiState.Error -> ErrorScreen(retryAction, modifier = modifier.fillMaxSize())
     }
 }
 
@@ -93,10 +100,10 @@ fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
     }
 }
 
-/** The home screen displaying photo grid. */
+/** The home screen displaying hours grid. */
 @Composable
-fun PhotosGridScreen(
-    photos: List<MarsPhoto>,
+fun BusinessHoursGridScreen(
+    response: BusinessHoursResponse,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
@@ -105,51 +112,60 @@ fun PhotosGridScreen(
         modifier = modifier.padding(horizontal = 4.dp),
         contentPadding = contentPadding,
     ) {
-        items(items = photos, key = { photo -> photo.id }) { photo ->
-            MarsPhotoCard(photo, modifier = modifier.padding(4.dp).fillMaxWidth().aspectRatio(1.5f))
+        items(
+            items = response.hours,
+            key = { hour -> "${hour.dayOfWeek}_${hour.startLocalTime}" }
+        ) { hour ->
+            BusinessHoursCard(
+                hour,
+                modifier = modifier.padding(4.dp).fillMaxWidth().aspectRatio(1.5f)
+            )
         }
     }
 }
 
 @Composable
-fun MarsPhotoCard(photo: MarsPhoto, modifier: Modifier = Modifier) {
+fun BusinessHoursCard(hour: Hour, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier,
         shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
-        AsyncImage(
-            model =
-                ImageRequest.Builder(context = LocalContext.current)
-                    .data(photo.imgSrc) // change from image card to text string HERE
-                    .crossfade(true)
-                    .build(),
-            error = painterResource(R.drawable.ic_broken_image),
-            placeholder = painterResource(R.drawable.loading_img),
-            contentDescription = stringResource(R.string.mars_photo),
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxWidth()
+        Text(
+            text = hour.dayOfWeek,
+            modifier =
+                Modifier.padding(16.dp) // Add padding inside the card
+                    .fillMaxWidth() // Make the text fill the width of the card
         )
     }
+}
+
+@Composable
+fun businessNameHeader(response: BusinessHoursResponse, modifier: Modifier = Modifier) {
+    Text(text = response.locationName, modifier = modifier)
 }
 
 @Preview(showBackground = true)
 @Composable
 fun LoadingScreenPreview() {
-    MarsPhotosTheme { LoadingScreen() }
+    BusinessHoursTheme { LoadingScreen() }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun ErrorScreenPreview() {
-    MarsPhotosTheme { ErrorScreen({}) }
+    BusinessHoursTheme { ErrorScreen({}) }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun PhotosGridScreenPreview() {
-    MarsPhotosTheme {
-        val mockData = List(10) { MarsPhoto("$it", "") }
-        PhotosGridScreen(mockData)
+fun BusinessHoursGridScreenPreview() {
+    BusinessHoursTheme {
+        val mockData =
+            BusinessHoursResponse(
+                locationName = "Example Location",
+                hours = List(10) { Hour("$it", "", "") }
+            )
+        BusinessHoursGridScreen(mockData)
     }
 }

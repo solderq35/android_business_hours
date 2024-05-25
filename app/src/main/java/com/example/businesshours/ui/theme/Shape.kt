@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.marsphotos.fake
 
-import com.example.marsphotos.model.MarsPhoto
+package com.example.businesshours.ui.theme
 
-object FakeDataSource {
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Shapes
+import androidx.compose.ui.unit.dp
 
-    private const val idOne = "img1"
-    private const val idTwo = "img2"
-    private const val imgOne = "url.one"
-    private const val imgTwo = "url.two"
-    val photosList =
-        listOf(MarsPhoto(id = idOne, imgSrc = imgOne), MarsPhoto(id = idTwo, imgSrc = imgTwo))
-}
+val Shapes =
+    Shapes(
+        small = RoundedCornerShape(4.dp),
+        medium = RoundedCornerShape(16.dp),
+    )

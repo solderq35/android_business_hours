@@ -13,13 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.marsphotos.fake
+package com.example.businesshours
 
-import com.example.marsphotos.data.MarsPhotosRepository
-import com.example.marsphotos.model.MarsPhoto
+import android.app.Application
+import com.example.businesshours.data.AppContainer
+import com.example.businesshours.data.DefaultAppContainer
 
-class FakeNetworkMarsPhotosRepository : MarsPhotosRepository {
-    override suspend fun getMarsPhotos(): List<MarsPhoto> {
-        return FakeDataSource.photosList
+class BusinessHoursApplication : Application() {
+    /** AppContainer instance used by the rest of classes to obtain dependencies */
+    lateinit var container: AppContainer
+
+    override fun onCreate() {
+        super.onCreate()
+        container = DefaultAppContainer()
     }
 }

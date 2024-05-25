@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.marsphotos
+package com.example.businesshours.fake
 
-import com.example.marsphotos.data.NetworkMarsPhotosRepository
-import com.example.marsphotos.fake.FakeDataSource
-import com.example.marsphotos.fake.FakeMarsApiService
-import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import com.example.businesshours.model.Hour
 
-class NetworkMarsRepositoryTest {
+object FakeDataSource {
 
-    @Test
-    fun networkMarsPhotosRepository_getMarsPhotos_verifyPhotoList() = runTest {
-        val repository = NetworkMarsPhotosRepository(marsApiService = FakeMarsApiService())
-        assertEquals(FakeDataSource.photosList, repository.getMarsPhotos())
-    }
+    private const val dayOne = "TUE"
+    private const val dayTwo = "WED"
+    private const val startOne = "07:00:00"
+    private const val startTwo = "07:00:00"
+    private const val endOne = "13:00:00"
+    private const val endTwo = "15:00:00"
+    val hoursList =
+        listOf(
+            Hour(dayOfWeek = dayOne, startLocalTime = startOne, endLocalTime = endOne),
+            Hour(dayOfWeek = dayTwo, startLocalTime = startTwo, endLocalTime = endTwo),
+        )
 }

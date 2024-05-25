@@ -32,6 +32,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "MarsPhotos"
+rootProject.name = "BusinessHours"
 
 include(":app")
