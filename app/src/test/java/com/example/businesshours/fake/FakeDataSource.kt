@@ -25,7 +25,7 @@ object FakeDataSource {
     private const val startTwo = "07:00:00"
     private const val endOne = "13:00:00"
     private const val endTwo = "15:00:00"
-    val photosList =
+    val hoursList =
         listOf(
             Hour(dayOfWeek = dayOne, startLocalTime = startOne, endLocalTime = endOne),
             Hour(dayOfWeek = dayTwo, startLocalTime = startTwo, endLocalTime = endTwo),

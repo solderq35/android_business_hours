@@ -32,18 +32,18 @@ import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
 /** UI state for the Home screen */
-sealed interface MarsUiState {
-    data class Success(val photos: List<Hour>) : MarsUiState
+sealed interface BusinessHoursUiState {
+    data class Success(val hours: List<Hour>) : BusinessHoursUiState
 
-    object Error : MarsUiState
+    object Error : BusinessHoursUiState
 
-    object Loading : MarsUiState
+    object Loading : BusinessHoursUiState
 }
 
 class BusinessHoursViewModel(private val businessHoursRepository: BusinessHoursRepository) :
     ViewModel() {
     /** The mutable State that stores the status of the most recent request */
-    var marsUiState: MarsUiState by mutableStateOf(MarsUiState.Loading)
+    var businessHoursUiState: BusinessHoursUiState by mutableStateOf(BusinessHoursUiState.Loading)
         private set
 
     /** Call getMarsPhotos() on init so we can display status immediately. */
@@ -57,14 +57,14 @@ class BusinessHoursViewModel(private val businessHoursRepository: BusinessHoursR
      */
     fun getBusinessHours() {
         viewModelScope.launch {
-            marsUiState = MarsUiState.Loading
-            marsUiState =
+            businessHoursUiState = BusinessHoursUiState.Loading
+            businessHoursUiState =
                 try {
-                    MarsUiState.Success(businessHoursRepository.getBusinessHours())
+                    BusinessHoursUiState.Success(businessHoursRepository.getBusinessHours())
                 } catch (e: IOException) {
-                    MarsUiState.Error
+                    BusinessHoursUiState.Error
                 } catch (e: HttpException) {
-                    MarsUiState.Error
+                    BusinessHoursUiState.Error
                 }
         }
     }

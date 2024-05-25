@@ -47,7 +47,7 @@ fun BusinessHoursApp() {
             val businessHoursViewModel: BusinessHoursViewModel =
                 viewModel(factory = BusinessHoursViewModel.Factory)
             HomeScreen(
-                marsUiState = businessHoursViewModel.marsUiState,
+                businessHoursUiState = businessHoursViewModel.businessHoursUiState,
                 retryAction = businessHoursViewModel::getBusinessHours,
                 contentPadding = it
             )

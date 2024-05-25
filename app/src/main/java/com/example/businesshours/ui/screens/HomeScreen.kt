@@ -45,20 +45,20 @@ import com.example.marsphotos.R
 
 @Composable
 fun HomeScreen(
-    marsUiState: MarsUiState,
+    businessHoursUiState: BusinessHoursUiState,
     retryAction: () -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
-    when (marsUiState) {
-        is MarsUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
-        is MarsUiState.Success ->
-            PhotosGridScreen(
-                marsUiState.photos,
+    when (businessHoursUiState) {
+        is BusinessHoursUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
+        is BusinessHoursUiState.Success ->
+            BusinessHoursGridScreen(
+                businessHoursUiState.hours,
                 contentPadding = contentPadding,
                 modifier = modifier.fillMaxWidth()
             )
-        is MarsUiState.Error -> ErrorScreen(retryAction, modifier = modifier.fillMaxSize())
+        is BusinessHoursUiState.Error -> ErrorScreen(retryAction, modifier = modifier.fillMaxSize())
     }
 }
 
@@ -91,8 +91,8 @@ fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
 
 /** The home screen displaying photo grid. */
 @Composable
-fun PhotosGridScreen(
-    photos: List<Hour>,
+fun BusinessHoursGridScreen(
+    hours: List<Hour>,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
@@ -101,22 +101,24 @@ fun PhotosGridScreen(
         modifier = modifier.padding(horizontal = 4.dp),
         contentPadding = contentPadding,
     ) {
-        items(items = photos, key = { photo -> "${photo.dayOfWeek}_${photo.startLocalTime}" }) {
-            photo ->
-            MarsPhotoCard(photo, modifier = modifier.padding(4.dp).fillMaxWidth().aspectRatio(1.5f))
+        items(items = hours, key = { hour -> "${hour.dayOfWeek}_${hour.startLocalTime}" }) { hour ->
+            BusinessHoursCard(
+                hour,
+                modifier = modifier.padding(4.dp).fillMaxWidth().aspectRatio(1.5f)
+            )
         }
     }
 }
 
 @Composable
-fun MarsPhotoCard(photo: Hour, modifier: Modifier = Modifier) {
+fun BusinessHoursCard(hour: Hour, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier,
         shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Text(
-            text = photo.dayOfWeek,
+            text = hour.dayOfWeek,
             modifier =
                 Modifier.padding(16.dp) // Add padding inside the card
                     .fillMaxWidth() // Make the text fill the width of the card
@@ -138,9 +140,9 @@ fun ErrorScreenPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun PhotosGridScreenPreview() {
+fun BusinessHoursGridScreenPreview() {
     BusinessHoursTheme {
         val mockData = List(10) { Hour("$it", "", "") }
-        PhotosGridScreen(mockData)
+        BusinessHoursGridScreen(mockData)
     }
 }

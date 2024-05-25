@@ -20,6 +20,6 @@ import com.example.businesshours.network.BusinessHoursApiService
 
 class FakeBusinessHoursApiService : BusinessHoursApiService {
     override suspend fun getBusinessHoursData(): List<Hour> {
-        return FakeDataSource.photosList
+        return FakeDataSource.hoursList
     }
 }

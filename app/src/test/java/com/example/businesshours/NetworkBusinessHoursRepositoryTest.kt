@@ -28,6 +28,6 @@ class NetworkBusinessHoursRepositoryTest {
     fun networkBusinessHoursRepository_getBusinessHours_verifyHoursList() = runTest {
         val repository =
             NetworkBusinessHoursRepository(businessHoursApiService = FakeBusinessHoursApiService())
-        assertEquals(FakeDataSource.photosList, repository.getBusinessHours())
+        assertEquals(FakeDataSource.hoursList, repository.getBusinessHours())
     }
 }

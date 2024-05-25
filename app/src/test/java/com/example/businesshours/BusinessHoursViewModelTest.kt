@@ -18,8 +18,8 @@ package com.example.businesshours
 import com.example.businesshours.fake.FakeDataSource
 import com.example.businesshours.fake.FakeNetworkBusinessHoursRepository
 import com.example.businesshours.rules.TestDispatcherRule
+import com.example.businesshours.ui.screens.BusinessHoursUiState
 import com.example.businesshours.ui.screens.BusinessHoursViewModel
-import com.example.businesshours.ui.screens.MarsUiState
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -34,8 +34,8 @@ class BusinessHoursViewModelTest {
         val businessHoursViewModel =
             BusinessHoursViewModel(businessHoursRepository = FakeNetworkBusinessHoursRepository())
         assertEquals(
-            MarsUiState.Success(FakeDataSource.photosList),
-            businessHoursViewModel.marsUiState
+            BusinessHoursUiState.Success(FakeDataSource.hoursList),
+            businessHoursViewModel.businessHoursUiState
         )
     }
 }
