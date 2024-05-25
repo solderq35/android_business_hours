@@ -41,7 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.businesshours.model.Hour
 import com.example.businesshours.ui.theme.BusinessHoursTheme
-import com.example.marsphotos.R
+import com.example.businesshours.R
 
 @Composable
 fun HomeScreen(
