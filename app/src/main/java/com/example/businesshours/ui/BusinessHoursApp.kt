@@ -36,6 +36,7 @@ import com.example.businesshours.ui.screens.BusinessHoursViewModel
 import com.example.businesshours.ui.screens.HomeScreen
 import com.example.marsphotos.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BusinessHoursApp() {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
