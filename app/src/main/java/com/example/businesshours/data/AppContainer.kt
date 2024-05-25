@@ -32,7 +32,7 @@ interface AppContainer {
  * Variables are initialized lazily and the same instance is shared across the whole app.
  */
 class DefaultAppContainer : AppContainer {
-    private val baseUrl = "https://android-kotlin-fun-mars-server.appspot.com/"
+    private val baseUrl = "https://purs-demo-bucket-test.s3.us-west-2.amazonaws.com/"
 
     /**
      * Use the Retrofit builder to build a retrofit object using a kotlinx.serialization converter
@@ -43,12 +43,12 @@ class DefaultAppContainer : AppContainer {
             .baseUrl(baseUrl)
             .build()
 
-    /** Retrofit service object for creating api calls */
+    /** Retrofit service object for creating API calls */
     private val retrofitService: BusinessHoursApiService by lazy {
         retrofit.create(BusinessHoursApiService::class.java)
     }
 
-    /** DI implementation for Mars photos repository */
+    /** DI implementation for business hours repository */
     override val businessHoursRepository: BusinessHoursRepository by lazy {
         NetworkBusinessHoursRepository(retrofitService)
     }

@@ -15,17 +15,19 @@
  */
 package com.example.businesshours.fake
 
-import com.example.businesshours.model.BusinessHoursData
+import com.example.businesshours.model.Hour
 
 object FakeDataSource {
 
-    private const val idOne = "img1"
-    private const val idTwo = "img2"
-    private const val imgOne = "url.one"
-    private const val imgTwo = "url.two"
+    private const val dayOne = "TUE"
+    private const val dayTwo = "WED"
+    private const val startOne = "07:00:00"
+    private const val startTwo = "07:00:00"
+    private const val endOne = "13:00:00"
+    private const val endTwo = "15:00:00"
     val photosList =
         listOf(
-            BusinessHoursData(id = idOne, imgSrc = imgOne),
-            BusinessHoursData(id = idTwo, imgSrc = imgTwo)
+            Hour(dayOfWeek = dayOne, startLocalTime = startOne, endLocalTime = endOne),
+            Hour(dayOfWeek = dayTwo, startLocalTime = startTwo, endLocalTime = endTwo),
         )
 }

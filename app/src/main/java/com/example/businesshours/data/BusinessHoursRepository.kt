@@ -1,38 +1,18 @@
-/*
- * Copyright (C) 2023 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.example.businesshours.data
 
 import android.util.Log
-import com.example.businesshours.model.BusinessHoursData
+import com.example.businesshours.model.Hour
 import com.example.businesshours.network.BusinessHoursApiService
 
-/** Repository that fetch mars photos list from marsApi. */
 interface BusinessHoursRepository {
-    /** Fetches list of MarsPhoto from marsApi */
-    suspend fun getBusinessHours(): List<BusinessHoursData>
+    suspend fun getBusinessHours(): List<Hour>
 }
 
-/** Network Implementation of Repository that fetch mars photos list from marsApi. */
 class NetworkBusinessHoursRepository(private val businessHoursApiService: BusinessHoursApiService) :
     BusinessHoursRepository {
-    /** Fetches list of MarsPhoto from marsApi */
-    override suspend fun getBusinessHours(): List<BusinessHoursData> {
+    override suspend fun getBusinessHours(): List<Hour> {
         val response = businessHoursApiService.getBusinessHoursData()
-        // Log the response
-        Log.d("MarsPhotosRepository", "API Response: $response")
-        return response
+        Log.d("BusinessHoursRepository", "API Response: $response")
+        return response.hours
     }
 }

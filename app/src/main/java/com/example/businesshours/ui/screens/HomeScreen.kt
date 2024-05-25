@@ -39,7 +39,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.businesshours.model.BusinessHoursData
+import com.example.businesshours.model.Hour
 import com.example.businesshours.ui.theme.BusinessHoursTheme
 import com.example.marsphotos.R
 
@@ -92,7 +92,7 @@ fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
 /** The home screen displaying photo grid. */
 @Composable
 fun PhotosGridScreen(
-    photos: List<BusinessHoursData>,
+    photos: List<Hour>,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
@@ -101,21 +101,22 @@ fun PhotosGridScreen(
         modifier = modifier.padding(horizontal = 4.dp),
         contentPadding = contentPadding,
     ) {
-        items(items = photos, key = { photo -> photo.id }) { photo ->
+        items(items = photos, key = { photo -> "${photo.dayOfWeek}_${photo.startLocalTime}" }) {
+            photo ->
             MarsPhotoCard(photo, modifier = modifier.padding(4.dp).fillMaxWidth().aspectRatio(1.5f))
         }
     }
 }
 
 @Composable
-fun MarsPhotoCard(photo: BusinessHoursData, modifier: Modifier = Modifier) {
+fun MarsPhotoCard(photo: Hour, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier,
         shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Text(
-            text = photo.imgSrc,
+            text = photo.dayOfWeek,
             modifier =
                 Modifier.padding(16.dp) // Add padding inside the card
                     .fillMaxWidth() // Make the text fill the width of the card
@@ -139,7 +140,7 @@ fun ErrorScreenPreview() {
 @Composable
 fun PhotosGridScreenPreview() {
     BusinessHoursTheme {
-        val mockData = List(10) { BusinessHoursData("$it", "") }
+        val mockData = List(10) { Hour("$it", "", "") }
         PhotosGridScreen(mockData)
     }
 }

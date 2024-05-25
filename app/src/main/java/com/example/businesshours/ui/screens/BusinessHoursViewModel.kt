@@ -26,14 +26,14 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.businesshours.BusinessHoursApplication
 import com.example.businesshours.data.BusinessHoursRepository
-import com.example.businesshours.model.BusinessHoursData
+import com.example.businesshours.model.Hour
 import java.io.IOException
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
 /** UI state for the Home screen */
 sealed interface MarsUiState {
-    data class Success(val photos: List<BusinessHoursData>) : MarsUiState
+    data class Success(val photos: List<Hour>) : MarsUiState
 
     object Error : MarsUiState
 
