@@ -19,9 +19,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -40,6 +42,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.businesshours.R
+import com.example.businesshours.model.BusinessHoursResponse
 import com.example.businesshours.model.Hour
 import com.example.businesshours.ui.theme.BusinessHoursTheme
 
@@ -52,12 +55,20 @@ fun HomeScreen(
 ) {
     when (businessHoursUiState) {
         is BusinessHoursUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
-        is BusinessHoursUiState.Success ->
-            BusinessHoursGridScreen(
-                businessHoursUiState.hours,
-                contentPadding = contentPadding,
-                modifier = modifier.fillMaxWidth()
-            )
+        is BusinessHoursUiState.Success -> {
+            Column {
+                Spacer(modifier = modifier.height(16.dp))
+                businessNameHeader(
+                    businessHoursUiState.response,
+                    modifier = modifier.padding(16.dp)
+                )
+                BusinessHoursGridScreen(
+                    businessHoursUiState.response,
+                    contentPadding = contentPadding,
+                    modifier = modifier.fillMaxWidth()
+                )
+            }
+        }
         is BusinessHoursUiState.Error -> ErrorScreen(retryAction, modifier = modifier.fillMaxSize())
     }
 }
@@ -92,7 +103,7 @@ fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
 /** The home screen displaying hours grid. */
 @Composable
 fun BusinessHoursGridScreen(
-    hours: List<Hour>,
+    response: BusinessHoursResponse,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
@@ -101,7 +112,10 @@ fun BusinessHoursGridScreen(
         modifier = modifier.padding(horizontal = 4.dp),
         contentPadding = contentPadding,
     ) {
-        items(items = hours, key = { hour -> "${hour.dayOfWeek}_${hour.startLocalTime}" }) { hour ->
+        items(
+            items = response.hours,
+            key = { hour -> "${hour.dayOfWeek}_${hour.startLocalTime}" }
+        ) { hour ->
             BusinessHoursCard(
                 hour,
                 modifier = modifier.padding(4.dp).fillMaxWidth().aspectRatio(1.5f)
@@ -126,6 +140,11 @@ fun BusinessHoursCard(hour: Hour, modifier: Modifier = Modifier) {
     }
 }
 
+@Composable
+fun businessNameHeader(response: BusinessHoursResponse, modifier: Modifier = Modifier) {
+    Text(text = response.locationName, modifier = modifier)
+}
+
 @Preview(showBackground = true)
 @Composable
 fun LoadingScreenPreview() {
@@ -142,7 +161,11 @@ fun ErrorScreenPreview() {
 @Composable
 fun BusinessHoursGridScreenPreview() {
     BusinessHoursTheme {
-        val mockData = List(10) { Hour("$it", "", "") }
+        val mockData =
+            BusinessHoursResponse(
+                locationName = "Example Location",
+                hours = List(10) { Hour("$it", "", "") }
+            )
         BusinessHoursGridScreen(mockData)
     }
 }
