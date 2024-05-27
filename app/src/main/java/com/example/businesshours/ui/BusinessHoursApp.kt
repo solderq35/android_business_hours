@@ -42,8 +42,7 @@ fun BusinessHoursApp() {
                 viewModel(factory = BusinessHoursViewModel.Factory)
             HomeScreen(
                 businessHoursUiState = businessHoursViewModel.businessHoursUiState,
-                retryAction = businessHoursViewModel::getBusinessHours,
-                contentPadding = it
+                retryAction = businessHoursViewModel::getBusinessHours
             )
         }
     }
