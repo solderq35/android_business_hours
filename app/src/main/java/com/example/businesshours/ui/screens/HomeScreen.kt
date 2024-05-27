@@ -45,6 +45,11 @@ import com.example.businesshours.R
 import com.example.businesshours.model.BusinessHoursResponse
 import com.example.businesshours.model.Hour
 import com.example.businesshours.ui.theme.BusinessHoursTheme
+import java.time.DayOfWeek
+
+data class TimeWindow(val startTime: String, val endTime: String, val endTimeNextDay: Boolean)
+
+data class NewHour(val dayOfWeek: String, val timeWindows: List<TimeWindow>)
 
 @Composable
 fun HomeScreen(
@@ -58,7 +63,7 @@ fun HomeScreen(
         is BusinessHoursUiState.Success -> {
             Column {
                 Spacer(modifier = modifier.height(16.dp))
-                businessNameHeader(
+                BusinessNameHeader(
                     businessHoursUiState.response,
                     modifier = modifier.padding(16.dp)
                 )
@@ -107,17 +112,113 @@ fun BusinessHoursGridScreen(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
+
+    fun convertAbbreviationToFullDay(abbreviation: String): String {
+        return when (abbreviation) {
+            "MON" -> "MONDAY"
+            "TUE" -> "TUESDAY"
+            "WED" -> "WEDNESDAY"
+            "THU" -> "THURSDAY"
+            "FRI" -> "FRIDAY"
+            "SAT" -> "SATURDAY"
+            "SUN" -> "SUNDAY"
+            else -> throw IllegalArgumentException("Invalid day abbreviation: $abbreviation")
+        }
+    }
+
+    // Example usage:
+    val sortedHours =
+        response.hours.sortedWith(
+            compareBy<Hour> { DayOfWeek.valueOf(convertAbbreviationToFullDay(it.dayOfWeek)) }
+                .thenBy { it.startLocalTime }
+        )
+
+    println(sortedHours)
+
+    for (hour in sortedHours) {
+        println(hour)
+    }
+    // Convert original Hour data class to NewHour
+    val newHours =
+        sortedHours
+            .groupBy { it.dayOfWeek }
+            .map { (dayOfWeek, hours) ->
+                val timeWindows =
+                    hours.map { hour ->
+                        TimeWindow(
+                            hour.startLocalTime,
+                            hour.endLocalTime,
+                            hour.endLocalTime < hour.startLocalTime
+                        )
+                    }
+                NewHour(dayOfWeek, timeWindows)
+            }
+    println(newHours)
+
+    val modifiedHours = mutableListOf<NewHour>()
+
+    var i = 0
+    while (i < newHours.size) {
+        val currentHour = newHours[i]
+        val prevIndex = if (i == 0) newHours.size - 1 else i - 1
+        val nextIndex = (i + 1) % newHours.size
+        val prevHour = newHours[prevIndex]
+        val nextHour = newHours[nextIndex]
+
+        val modifiedTimeWindows = mutableListOf<TimeWindow>()
+
+        // Iterate through the time windows of the current hour
+        for (currentTimeWindow in currentHour.timeWindows) {
+            // If the end time of the current window is "24:00"
+            if (currentTimeWindow.endTime == "24:00:00") {
+                // Check if there's a next day and the next day starts at "00:00"
+                if (
+                    nextHour.timeWindows.isNotEmpty() &&
+                        nextHour.timeWindows.first().startTime == "00:00:00"
+                ) {
+                    // Modify the end time of the current window and set endTimeNextDay to true
+                    modifiedTimeWindows.add(
+                        TimeWindow(
+                            startTime = currentTimeWindow.startTime,
+                            endTime = nextHour.timeWindows.first().endTime,
+                            endTimeNextDay = true
+                        )
+                    )
+                    // Skip the next day's window
+                    continue
+                }
+            }
+
+            if (currentTimeWindow.startTime == "00:00:00") {
+                // Check if there's a next day and the next day starts at "00:00"
+                if (
+                    prevHour.timeWindows.isNotEmpty() &&
+                        prevHour.timeWindows.last().endTime == "24:00:00"
+                ) {
+                    continue
+                }
+            }
+
+            // Add the original window if no modification needed
+            modifiedTimeWindows.add(currentTimeWindow)
+        }
+
+        // Create a new NewHour object with modified time windows
+        modifiedHours.add(NewHour(currentHour.dayOfWeek, modifiedTimeWindows))
+
+        i++
+    }
+
+    println(modifiedHours)
+
     LazyVerticalGrid(
         columns = GridCells.Adaptive(150.dp),
         modifier = modifier.padding(horizontal = 4.dp),
         contentPadding = contentPadding,
     ) {
-        items(
-            items = response.hours,
-            key = { hour -> "${hour.dayOfWeek}_${hour.startLocalTime}" }
-        ) { hour ->
+        items(items = modifiedHours, key = { newHour -> newHour.dayOfWeek }) { newHour ->
             BusinessHoursCard(
-                hour,
+                newHour,
                 modifier = modifier.padding(4.dp).fillMaxWidth().aspectRatio(1.5f)
             )
         }
@@ -125,23 +226,35 @@ fun BusinessHoursGridScreen(
 }
 
 @Composable
-fun BusinessHoursCard(hour: Hour, modifier: Modifier = Modifier) {
+fun BusinessHoursCard(newHour: NewHour, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier,
         shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
-        Text(
-            text = hour.dayOfWeek,
-            modifier =
-                Modifier.padding(16.dp) // Add padding inside the card
-                    .fillMaxWidth() // Make the text fill the width of the card
-        )
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = newHour.dayOfWeek, modifier = Modifier.fillMaxWidth())
+            Spacer(modifier = Modifier.height(8.dp))
+            newHour.timeWindows.forEach { timeWindow ->
+                Text(text = formatTimeWindow(timeWindow), modifier = Modifier.fillMaxWidth())
+            }
+        }
     }
 }
 
 @Composable
-fun businessNameHeader(response: BusinessHoursResponse, modifier: Modifier = Modifier) {
+fun formatTimeWindow(timeWindow: TimeWindow): String {
+    val endTime =
+        if (timeWindow.endTimeNextDay) {
+            "${timeWindow.endTime} (next day)"
+        } else {
+            timeWindow.endTime
+        }
+    return "${timeWindow.startTime} - $endTime"
+}
+
+@Composable
+fun BusinessNameHeader(response: BusinessHoursResponse, modifier: Modifier = Modifier) {
     Text(text = response.locationName, modifier = modifier)
 }
 
