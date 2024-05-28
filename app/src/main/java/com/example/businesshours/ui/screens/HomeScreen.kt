@@ -208,9 +208,19 @@ fun BusinessHoursGridScreen(
     val rows =
         businessHoursLateNight
             .flatMap { businessHour ->
+                var firstTimeWindow = true
                 businessHour.timeWindows.map { timeWindow ->
+                    // If a day has multiple time windows, only show the day of the week label the
+                    // first time
+                    val securityValue =
+                        if (firstTimeWindow) {
+                            firstTimeWindow = false
+                            businessHour.dayOfWeek
+                        } else {
+                            ""
+                        }
                     AccordionModel.Row(
-                        security = businessHour.dayOfWeek,
+                        security = securityValue,
                         price = "${timeWindow.startTime} - ${timeWindow.endTime}"
                     )
                 }
