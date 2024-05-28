@@ -16,6 +16,7 @@
 package com.example.businesshours.fake
 
 import com.example.businesshours.model.BusinessHours
+import com.example.businesshours.model.BusinessHoursResponse
 
 object FakeDataSource {
 
@@ -25,9 +26,14 @@ object FakeDataSource {
     private const val startTwo = "07:00:00"
     private const val endOne = "13:00:00"
     private const val endTwo = "15:00:00"
-    val hoursLists =
+    private const val locationName = "Sample Location"
+
+    val businessHoursList =
         listOf(
             BusinessHours(dayOfWeek = dayOne, startLocalTime = startOne, endLocalTime = endOne),
-            BusinessHours(dayOfWeek = dayTwo, startLocalTime = startTwo, endLocalTime = endTwo),
+            BusinessHours(dayOfWeek = dayTwo, startLocalTime = startTwo, endLocalTime = endTwo)
         )
+
+    val businessHoursResponse =
+        BusinessHoursResponse(locationName = locationName, businessHours = businessHoursList)
 }

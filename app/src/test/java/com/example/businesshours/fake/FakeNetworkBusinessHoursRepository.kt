@@ -16,10 +16,10 @@
 package com.example.businesshours.fake
 
 import com.example.businesshours.data.BusinessHoursRepository
-import com.example.businesshours.model.BusinessHours
+import com.example.businesshours.model.BusinessHoursResponse
 
 class FakeNetworkBusinessHoursRepository : BusinessHoursRepository {
-    override suspend fun getBusinessHours(): List<BusinessHours> {
-        return FakeDataSource.hoursLists
+    override suspend fun getBusinessHours(): BusinessHoursResponse {
+        return FakeDataSource.businessHoursResponse
     }
 }
