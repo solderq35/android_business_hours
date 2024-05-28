@@ -16,7 +16,6 @@
 package com.example.businesshours.ui.screens
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -32,20 +31,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.businesshours.R
 import com.example.businesshours.model.BusinessHours
 import com.example.businesshours.model.BusinessHoursResponse
+import com.example.businesshours.ui.components.AccordionGroup
+import com.example.businesshours.ui.components.AccordionModel
 import com.example.businesshours.ui.theme.BusinessHoursTheme
 import java.time.DayOfWeek
 
@@ -207,28 +204,24 @@ fun BusinessHoursGridScreen(
     }
 
     println(businessHoursLateNight)
-
-    var expanded by remember { mutableStateOf(false) }
-
-    Column {
-        Text(
-            text = "Toggle All",
-            style = TextStyle(fontWeight = FontWeight.Bold),
-            modifier = Modifier.padding(16.dp).clickable { expanded = !expanded }
-        )
-
-        if (expanded) {
-            businessHoursLateNight.forEach { lateNightHour ->
-                lateNightHour.timeWindows.forEach { timeWindow ->
-                    Text(
-                        text =
-                            "${lateNightHour.dayOfWeek}: ${timeWindow.startTime} - ${timeWindow.endTime}",
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+    // Transform the data
+    val rows =
+        businessHoursLateNight
+            .flatMap { businessHour ->
+                businessHour.timeWindows.map { timeWindow ->
+                    AccordionModel.Row(
+                        security = businessHour.dayOfWeek,
+                        price = "${timeWindow.startTime} - ${timeWindow.endTime}"
                     )
                 }
             }
-        }
-    }
+            .toMutableList()
+
+    // Create the AccordionModel
+    val modelTechStocks = AccordionModel(header = "Technology Stocks", rows = rows)
+    val group = listOf(modelTechStocks)
+
+    AccordionGroup(modifier = Modifier.padding(top = 8.dp), group = group)
 }
 
 @Composable
