@@ -25,6 +25,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.businesshours.ui.theme.*
@@ -96,11 +97,11 @@ private fun AccordionHeader(
 private fun AccordionRow(model: AccordionModel.Row = AccordionModel.Row("AAPL", "$328.89")) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
         Text(model.accordionDayOfWeek, Modifier.weight(1f), onTextLayout = {})
-        Surface(shape = RoundedCornerShape(8.dp)) {
+        Surface(shape = RoundedCornerShape(8.dp), color = BlueGray50) {
             Text(
                 text = model.accordionTimeWindow,
                 modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp),
-                color = Green500,
+                color = Black,
                 onTextLayout = {}
             )
         }

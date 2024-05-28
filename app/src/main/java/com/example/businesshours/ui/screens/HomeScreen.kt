@@ -39,6 +39,8 @@ import com.example.businesshours.ui.components.AccordionGroup
 import com.example.businesshours.ui.components.AccordionModel
 import com.example.businesshours.ui.theme.BusinessHoursTheme
 import java.time.DayOfWeek
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 data class TimeWindow(val startTime: String, val endTime: String, val endTimeNextDay: Boolean)
@@ -196,29 +198,29 @@ fun BusinessHoursGridScreen(
             .flatMap { businessHour ->
                 var firstTimeWindow = true
                 businessHour.timeWindows.mapIndexed { index, timeWindow ->
-                    val securityValue =
+                    val accordionDayOfWeekValue =
                         if (firstTimeWindow) {
                             firstTimeWindow = false
-                            businessHour.dayOfWeek
+                            convertAbbreviationToFullDay(businessHour.dayOfWeek)
                         } else {
                             ""
                         }
-                    val priceValue =
+                    val accordionTimeWindowValue =
                         if (index == businessHour.timeWindows.size - 1) {
-                            "${timeWindow.startTime} - ${timeWindow.endTime}"
+                            "${convertToConventionalTime(timeWindow.startTime)}-${convertToConventionalTime(timeWindow.endTime)}"
                         } else {
-                            "${timeWindow.startTime} - ${timeWindow.endTime},"
+                            "${convertToConventionalTime(timeWindow.startTime)}-${convertToConventionalTime(timeWindow.endTime)},"
                         }
                     AccordionModel.Row(
-                        accordionDayOfWeek = securityValue,
-                        accordionTimeWindow = priceValue
+                        accordionDayOfWeek = accordionDayOfWeekValue,
+                        accordionTimeWindow = accordionTimeWindowValue
                     )
                 }
             }
             .toMutableList()
 
     // Create the AccordionModel
-    val modelTechStocks = AccordionModel(header = "Technology Stocks", rows = rows)
+    val modelTechStocks = AccordionModel(header = "Open Until PLACEHOLDER", rows = rows)
     val group = listOf(modelTechStocks)
 
     AccordionGroup(modifier = Modifier.padding(top = 8.dp), group = group)
@@ -269,4 +271,17 @@ fun convertAbbreviationToFullDay(abbreviation: String): String {
 
 fun convertAbbreviationToAllCaps(abbreviation: String): String {
     return convertAbbreviationToFullDay(abbreviation).uppercase(Locale.ROOT)
+}
+
+fun convertToConventionalTime(time24: String): String {
+    val time = LocalTime.parse(time24, DateTimeFormatter.ofPattern("HH:mm:ss"))
+
+    // If minutes value is 00, then just show the hour value, e.g. "7PM"
+    return if (time.minute == 0) {
+        time.format(DateTimeFormatter.ofPattern("ha"))
+    }
+    // If minutes value is not 00, then show both hours and minutes, e.g. "7:30PM"
+    else {
+        time.format(DateTimeFormatter.ofPattern("h:mma"))
+    }
 }
