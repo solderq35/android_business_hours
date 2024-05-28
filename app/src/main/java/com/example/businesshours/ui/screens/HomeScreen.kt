@@ -44,14 +44,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.businesshours.R
+import com.example.businesshours.model.BusinessHours
 import com.example.businesshours.model.BusinessHoursResponse
-import com.example.businesshours.model.Hour
 import com.example.businesshours.ui.theme.BusinessHoursTheme
 import java.time.DayOfWeek
 
 data class TimeWindow(val startTime: String, val endTime: String, val endTimeNextDay: Boolean)
 
-data class NewHour(val dayOfWeek: String, val timeWindows: List<TimeWindow>)
+data class ModifiedBusinessHour(val dayOfWeek: String, val timeWindows: List<TimeWindow>)
 
 @Composable
 fun HomeScreen(
@@ -122,20 +122,22 @@ fun BusinessHoursGridScreen(
     }
 
     // Example usage:
-    val sortedHours =
-        response.hours.sortedWith(
-            compareBy<Hour> { DayOfWeek.valueOf(convertAbbreviationToFullDay(it.dayOfWeek)) }
+    val sortedBusinessHours =
+        response.businessHours.sortedWith(
+            compareBy<BusinessHours> {
+                    DayOfWeek.valueOf(convertAbbreviationToFullDay(it.dayOfWeek))
+                }
                 .thenBy { it.startLocalTime }
         )
 
-    println(sortedHours)
+    println(sortedBusinessHours)
 
-    for (hour in sortedHours) {
+    for (hour in sortedBusinessHours) {
         println(hour)
     }
-    // Convert original Hour data class to NewHour
-    val newHours =
-        sortedHours
+    // Convert original Hour data class to ModifiedBusinessHour
+    val businessHoursByDay =
+        sortedBusinessHours
             .groupBy { it.dayOfWeek }
             .map { (dayOfWeek, hours) ->
                 val timeWindows =
@@ -146,19 +148,19 @@ fun BusinessHoursGridScreen(
                             hour.endLocalTime < hour.startLocalTime
                         )
                     }
-                NewHour(dayOfWeek, timeWindows)
+                ModifiedBusinessHour(dayOfWeek, timeWindows)
             }
-    println(newHours)
+    println(businessHoursByDay)
 
-    val modifiedHours = mutableListOf<NewHour>()
+    val businessHoursLateNight = mutableListOf<ModifiedBusinessHour>()
 
     var i = 0
-    while (i < newHours.size) {
-        val currentHour = newHours[i]
-        val prevIndex = if (i == 0) newHours.size - 1 else i - 1
-        val nextIndex = (i + 1) % newHours.size
-        val prevHour = newHours[prevIndex]
-        val nextHour = newHours[nextIndex]
+    while (i < businessHoursByDay.size) {
+        val currentHour = businessHoursByDay[i]
+        val prevIndex = if (i == 0) businessHoursByDay.size - 1 else i - 1
+        val nextIndex = (i + 1) % businessHoursByDay.size
+        val prevHour = businessHoursByDay[prevIndex]
+        val nextHour = businessHoursByDay[nextIndex]
 
         val modifiedTimeWindows = mutableListOf<TimeWindow>()
 
@@ -198,13 +200,13 @@ fun BusinessHoursGridScreen(
             modifiedTimeWindows.add(currentTimeWindow)
         }
 
-        // Create a new NewHour object with modified time windows
-        modifiedHours.add(NewHour(currentHour.dayOfWeek, modifiedTimeWindows))
+        // Create a new ModifiedBusinessHour object with modified time windows
+        businessHoursLateNight.add(ModifiedBusinessHour(currentHour.dayOfWeek, modifiedTimeWindows))
 
         i++
     }
 
-    println(modifiedHours)
+    println(businessHoursLateNight)
 
     var expanded by remember { mutableStateOf(false) }
 
@@ -216,11 +218,11 @@ fun BusinessHoursGridScreen(
         )
 
         if (expanded) {
-            modifiedHours.forEach { newHour ->
-                newHour.timeWindows.forEach { timeWindow ->
+            businessHoursLateNight.forEach { lateNightHour ->
+                lateNightHour.timeWindows.forEach { timeWindow ->
                     Text(
                         text =
-                            "${newHour.dayOfWeek}: ${timeWindow.startTime} - ${timeWindow.endTime}",
+                            "${lateNightHour.dayOfWeek}: ${timeWindow.startTime} - ${timeWindow.endTime}",
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     )
                 }
@@ -230,7 +232,7 @@ fun BusinessHoursGridScreen(
 }
 
 @Composable
-fun BusinessHoursCard(newHour: NewHour, modifier: Modifier = Modifier) {
+fun BusinessHoursCard(newHour: ModifiedBusinessHour, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier,
         shape = MaterialTheme.shapes.medium,
@@ -281,7 +283,7 @@ fun BusinessHoursGridScreenPreview() {
         val mockData =
             BusinessHoursResponse(
                 locationName = "Example Location",
-                hours = List(10) { Hour("$it", "", "") }
+                businessHours = List(10) { BusinessHours("$it", "", "") }
             )
         BusinessHoursGridScreen(mockData)
     }

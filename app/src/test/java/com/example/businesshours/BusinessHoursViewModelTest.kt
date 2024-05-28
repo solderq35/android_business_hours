@@ -34,7 +34,7 @@ class BusinessHoursViewModelTest {
         val businessHoursViewModel =
             BusinessHoursViewModel(businessHoursRepository = FakeNetworkBusinessHoursRepository())
         assertEquals(
-            BusinessHoursUiState.Success(FakeDataSource.hoursList),
+            BusinessHoursUiState.Success(FakeDataSource.hoursLists),
             businessHoursViewModel.businessHoursUiState
         )
     }
