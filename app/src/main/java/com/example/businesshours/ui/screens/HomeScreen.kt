@@ -20,18 +20,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -45,6 +39,7 @@ import com.example.businesshours.ui.components.AccordionGroup
 import com.example.businesshours.ui.components.AccordionModel
 import com.example.businesshours.ui.theme.BusinessHoursTheme
 import java.time.DayOfWeek
+import java.util.Locale
 
 data class TimeWindow(val startTime: String, val endTime: String, val endTimeNextDay: Boolean)
 
@@ -94,8 +89,12 @@ fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
             painter = painterResource(id = R.drawable.ic_connection_error),
             contentDescription = ""
         )
-        Text(text = stringResource(R.string.loading_failed), modifier = Modifier.padding(16.dp))
-        Button(onClick = retryAction) { Text(stringResource(R.string.retry)) }
+        Text(
+            text = stringResource(R.string.loading_failed),
+            modifier = Modifier.padding(16.dp),
+            onTextLayout = {}
+        )
+        Button(onClick = retryAction) { Text(stringResource(R.string.retry), onTextLayout = {}) }
     }
 }
 
@@ -105,24 +104,11 @@ fun BusinessHoursGridScreen(
     response: BusinessHoursResponse,
 ) {
 
-    fun convertAbbreviationToFullDay(abbreviation: String): String {
-        return when (abbreviation) {
-            "MON" -> "MONDAY"
-            "TUE" -> "TUESDAY"
-            "WED" -> "WEDNESDAY"
-            "THU" -> "THURSDAY"
-            "FRI" -> "FRIDAY"
-            "SAT" -> "SATURDAY"
-            "SUN" -> "SUNDAY"
-            else -> throw IllegalArgumentException("Invalid day abbreviation: $abbreviation")
-        }
-    }
-
     // Example usage:
     val sortedBusinessHours =
         response.businessHours.sortedWith(
             compareBy<BusinessHours> {
-                    DayOfWeek.valueOf(convertAbbreviationToFullDay(it.dayOfWeek))
+                    DayOfWeek.valueOf(convertAbbreviationToAllCaps(it.dayOfWeek))
                 }
                 .thenBy { it.startLocalTime }
         )
@@ -209,9 +195,7 @@ fun BusinessHoursGridScreen(
         businessHoursLateNight
             .flatMap { businessHour ->
                 var firstTimeWindow = true
-                businessHour.timeWindows.map { timeWindow ->
-                    // If a day has multiple time windows, only show the day of the week label the
-                    // first time
+                businessHour.timeWindows.mapIndexed { index, timeWindow ->
                     val securityValue =
                         if (firstTimeWindow) {
                             firstTimeWindow = false
@@ -219,9 +203,15 @@ fun BusinessHoursGridScreen(
                         } else {
                             ""
                         }
+                    val priceValue =
+                        if (index == businessHour.timeWindows.size - 1) {
+                            "${timeWindow.startTime} - ${timeWindow.endTime}"
+                        } else {
+                            "${timeWindow.startTime} - ${timeWindow.endTime},"
+                        }
                     AccordionModel.Row(
-                        security = securityValue,
-                        price = "${timeWindow.startTime} - ${timeWindow.endTime}"
+                        accordionDayOfWeek = securityValue,
+                        accordionTimeWindow = priceValue
                     )
                 }
             }
@@ -235,36 +225,8 @@ fun BusinessHoursGridScreen(
 }
 
 @Composable
-fun BusinessHoursCard(newHour: ModifiedBusinessHour, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier,
-        shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = newHour.dayOfWeek, modifier = Modifier.fillMaxWidth())
-            Spacer(modifier = Modifier.height(8.dp))
-            newHour.timeWindows.forEach { timeWindow ->
-                Text(text = formatTimeWindow(timeWindow), modifier = Modifier.fillMaxWidth())
-            }
-        }
-    }
-}
-
-@Composable
-fun formatTimeWindow(timeWindow: TimeWindow): String {
-    val endTime =
-        if (timeWindow.endTimeNextDay) {
-            "${timeWindow.endTime} (next day)"
-        } else {
-            timeWindow.endTime
-        }
-    return "${timeWindow.startTime} - $endTime"
-}
-
-@Composable
 fun BusinessNameHeader(response: BusinessHoursResponse, modifier: Modifier = Modifier) {
-    Text(text = response.locationName, modifier = modifier)
+    Text(text = response.locationName, modifier = modifier, onTextLayout = {})
 }
 
 @Preview(showBackground = true)
@@ -290,4 +252,21 @@ fun BusinessHoursGridScreenPreview() {
             )
         BusinessHoursGridScreen(mockData)
     }
+}
+
+fun convertAbbreviationToFullDay(abbreviation: String): String {
+    return when (abbreviation.uppercase(Locale.ROOT)) {
+        "MON" -> "Monday"
+        "TUE" -> "Tuesday"
+        "WED" -> "Wednesday"
+        "THU" -> "Thursday"
+        "FRI" -> "Friday"
+        "SAT" -> "Saturday"
+        "SUN" -> "Sunday"
+        else -> throw IllegalArgumentException("Invalid day abbreviation: $abbreviation")
+    }
+}
+
+fun convertAbbreviationToAllCaps(abbreviation: String): String {
+    return convertAbbreviationToFullDay(abbreviation).uppercase(Locale.ROOT)
 }

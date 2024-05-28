@@ -7,7 +7,6 @@
 package com.example.businesshours.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.example.businesshours.ui.theme.*
 
 data class AccordionModel(val header: String, val rows: List<Row>) {
-    data class Row(val security: String, val price: String)
+    data class Row(val accordionDayOfWeek: String, val accordionTimeWindow: String)
 }
 
 @Composable
@@ -39,7 +38,6 @@ fun AccordionGroup(modifier: Modifier = Modifier, group: List<AccordionModel>) {
     Column(modifier = modifier) { group.forEach { Accordion(model = it) } }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun Accordion(modifier: Modifier = Modifier, model: AccordionModel) {
     var expanded by remember { mutableStateOf(false) }
@@ -80,7 +78,7 @@ private fun AccordionHeader(
             modifier = Modifier.clickable { onTapped() }.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(title, Modifier.weight(1f))
+            Text(title, Modifier.weight(1f), onTextLayout = {})
             Surface(shape = CircleShape) {
                 Icon(
                     Icons.Outlined.ArrowDropDown,
@@ -97,12 +95,13 @@ private fun AccordionHeader(
 @Composable
 private fun AccordionRow(model: AccordionModel.Row = AccordionModel.Row("AAPL", "$328.89")) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
-        Text(model.security, Modifier.weight(1f))
+        Text(model.accordionDayOfWeek, Modifier.weight(1f), onTextLayout = {})
         Surface(shape = RoundedCornerShape(8.dp)) {
             Text(
-                text = model.price,
+                text = model.accordionTimeWindow,
                 modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp),
-                color = Green500
+                color = Green500,
+                onTextLayout = {}
             )
         }
     }

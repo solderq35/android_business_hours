@@ -31,10 +31,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val DarkColorScheme =
+private val darkColorScheme =
     darkColorScheme(primary = Purple80, secondary = PurpleGrey80, tertiary = Pink80)
 
-private val LightColorScheme =
+private val lightColorScheme =
     lightColorScheme(primary = Purple40, secondary = PurpleGrey40, tertiary = Pink40)
 
 @Composable
@@ -51,8 +51,8 @@ fun BusinessHoursTheme(
                 val context = LocalContext.current
                 if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
             }
-            darkTheme -> DarkColorScheme
-            else -> LightColorScheme
+            darkTheme -> darkColorScheme
+            else -> lightColorScheme
         }
     val view = LocalView.current
     if (!view.isInEditMode) {

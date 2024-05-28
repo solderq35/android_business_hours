@@ -28,7 +28,7 @@ object FakeDataSource {
     private const val endTwo = "15:00:00"
     private const val locationName = "Sample Location"
 
-    val businessHoursList =
+    private val businessHoursList =
         listOf(
             BusinessHours(dayOfWeek = dayOne, startLocalTime = startOne, endLocalTime = endOne),
             BusinessHours(dayOfWeek = dayTwo, startLocalTime = startTwo, endLocalTime = endTwo)
