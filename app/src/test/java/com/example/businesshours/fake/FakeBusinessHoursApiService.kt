@@ -15,11 +15,11 @@
  */
 package com.example.businesshours.fake
 
-import com.example.businesshours.model.Hour
+import com.example.businesshours.model.BusinessHoursResponse
 import com.example.businesshours.network.BusinessHoursApiService
 
 class FakeBusinessHoursApiService : BusinessHoursApiService {
-    override suspend fun getBusinessHoursData(): List<Hour> {
-        return FakeDataSource.hoursList
+    override suspend fun getBusinessHoursData(): BusinessHoursResponse {
+        return FakeDataSource.businessHoursResponse
     }
 }

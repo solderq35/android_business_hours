@@ -18,6 +18,7 @@
 
 package com.example.businesshours.ui
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -30,6 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.businesshours.ui.screens.BusinessHoursViewModel
 import com.example.businesshours.ui.screens.HomeScreen
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BusinessHoursApp() {
@@ -42,8 +44,7 @@ fun BusinessHoursApp() {
                 viewModel(factory = BusinessHoursViewModel.Factory)
             HomeScreen(
                 businessHoursUiState = businessHoursViewModel.businessHoursUiState,
-                retryAction = businessHoursViewModel::getBusinessHours,
-                contentPadding = it
+                retryAction = businessHoursViewModel::getBusinessHours
             )
         }
     }

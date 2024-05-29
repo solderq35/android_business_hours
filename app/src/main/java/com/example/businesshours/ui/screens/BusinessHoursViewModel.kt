@@ -35,9 +35,9 @@ import retrofit2.HttpException
 sealed interface BusinessHoursUiState {
     data class Success(val response: BusinessHoursResponse) : BusinessHoursUiState
 
-    object Error : BusinessHoursUiState
+    data object Error : BusinessHoursUiState
 
-    object Loading : BusinessHoursUiState
+    data object Loading : BusinessHoursUiState
 }
 
 class BusinessHoursViewModel(private val businessHoursRepository: BusinessHoursRepository) :

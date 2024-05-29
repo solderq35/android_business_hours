@@ -18,21 +18,12 @@ package com.example.businesshours.ui.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -42,31 +33,36 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.businesshours.R
+import com.example.businesshours.model.BusinessHours
 import com.example.businesshours.model.BusinessHoursResponse
-import com.example.businesshours.model.Hour
+import com.example.businesshours.ui.components.AccordionGroup
+import com.example.businesshours.ui.components.AccordionModel
 import com.example.businesshours.ui.theme.BusinessHoursTheme
+import java.time.DayOfWeek
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+
+data class TimeWindow(val startTime: String, val endTime: String, val endTimeNextDay: Boolean)
+
+data class ModifiedBusinessHour(val dayOfWeek: String, val timeWindows: List<TimeWindow>)
 
 @Composable
 fun HomeScreen(
     businessHoursUiState: BusinessHoursUiState,
     retryAction: () -> Unit,
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     when (businessHoursUiState) {
         is BusinessHoursUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
         is BusinessHoursUiState.Success -> {
             Column {
                 Spacer(modifier = modifier.height(16.dp))
-                businessNameHeader(
+                BusinessNameHeader(
                     businessHoursUiState.response,
                     modifier = modifier.padding(16.dp)
                 )
-                BusinessHoursGridScreen(
-                    businessHoursUiState.response,
-                    contentPadding = contentPadding,
-                    modifier = modifier.fillMaxWidth()
-                )
+                BusinessHoursGridScreen(businessHoursUiState.response)
             }
         }
         is BusinessHoursUiState.Error -> ErrorScreen(retryAction, modifier = modifier.fillMaxSize())
@@ -95,8 +91,12 @@ fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
             painter = painterResource(id = R.drawable.ic_connection_error),
             contentDescription = ""
         )
-        Text(text = stringResource(R.string.loading_failed), modifier = Modifier.padding(16.dp))
-        Button(onClick = retryAction) { Text(stringResource(R.string.retry)) }
+        Text(
+            text = stringResource(R.string.loading_failed),
+            modifier = Modifier.padding(16.dp),
+            onTextLayout = {}
+        )
+        Button(onClick = retryAction) { Text(stringResource(R.string.retry), onTextLayout = {}) }
     }
 }
 
@@ -104,45 +104,131 @@ fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
 @Composable
 fun BusinessHoursGridScreen(
     response: BusinessHoursResponse,
-    modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(150.dp),
-        modifier = modifier.padding(horizontal = 4.dp),
-        contentPadding = contentPadding,
-    ) {
-        items(
-            items = response.hours,
-            key = { hour -> "${hour.dayOfWeek}_${hour.startLocalTime}" }
-        ) { hour ->
-            BusinessHoursCard(
-                hour,
-                modifier = modifier.padding(4.dp).fillMaxWidth().aspectRatio(1.5f)
-            )
-        }
-    }
-}
 
-@Composable
-fun BusinessHoursCard(hour: Hour, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier,
-        shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-    ) {
-        Text(
-            text = hour.dayOfWeek,
-            modifier =
-                Modifier.padding(16.dp) // Add padding inside the card
-                    .fillMaxWidth() // Make the text fill the width of the card
+    // Example usage:
+    val sortedBusinessHours =
+        response.businessHours.sortedWith(
+            compareBy<BusinessHours> {
+                    DayOfWeek.valueOf(convertAbbreviationToAllCaps(it.dayOfWeek))
+                }
+                .thenBy { it.startLocalTime }
         )
+
+    println(sortedBusinessHours)
+
+    for (hour in sortedBusinessHours) {
+        println(hour)
     }
+    // Convert original Hour data class to ModifiedBusinessHour
+    val businessHoursByDay =
+        sortedBusinessHours
+            .groupBy { it.dayOfWeek }
+            .map { (dayOfWeek, hours) ->
+                val timeWindows =
+                    hours.map { hour ->
+                        TimeWindow(
+                            hour.startLocalTime,
+                            hour.endLocalTime,
+                            hour.endLocalTime < hour.startLocalTime
+                        )
+                    }
+                ModifiedBusinessHour(dayOfWeek, timeWindows)
+            }
+    println(businessHoursByDay)
+
+    val businessHoursLateNight = mutableListOf<ModifiedBusinessHour>()
+
+    var i = 0
+    while (i < businessHoursByDay.size) {
+        val currentHour = businessHoursByDay[i]
+        val prevIndex = if (i == 0) businessHoursByDay.size - 1 else i - 1
+        val nextIndex = (i + 1) % businessHoursByDay.size
+        val prevHour = businessHoursByDay[prevIndex]
+        val nextHour = businessHoursByDay[nextIndex]
+
+        val modifiedTimeWindows = mutableListOf<TimeWindow>()
+
+        // Iterate through the time windows of the current hour
+        for (currentTimeWindow in currentHour.timeWindows) {
+            // If the end time of the current window is "24:00"
+            if (currentTimeWindow.endTime == "24:00:00") {
+                // Check if there's a next day and the next day starts at "00:00"
+                if (
+                    nextHour.timeWindows.isNotEmpty() &&
+                        nextHour.timeWindows.first().startTime == "00:00:00"
+                ) {
+                    // Modify the end time of the current window and set endTimeNextDay to true
+                    modifiedTimeWindows.add(
+                        TimeWindow(
+                            startTime = currentTimeWindow.startTime,
+                            endTime = nextHour.timeWindows.first().endTime,
+                            endTimeNextDay = true
+                        )
+                    )
+                    // Skip the next day's window
+                    continue
+                }
+            }
+
+            if (currentTimeWindow.startTime == "00:00:00") {
+                // Check if there's a next day and the next day starts at "00:00"
+                if (
+                    prevHour.timeWindows.isNotEmpty() &&
+                        prevHour.timeWindows.last().endTime == "24:00:00"
+                ) {
+                    continue
+                }
+            }
+
+            // Add the original window if no modification needed
+            modifiedTimeWindows.add(currentTimeWindow)
+        }
+
+        // Create a new ModifiedBusinessHour object with modified time windows
+        businessHoursLateNight.add(ModifiedBusinessHour(currentHour.dayOfWeek, modifiedTimeWindows))
+
+        i++
+    }
+
+    println(businessHoursLateNight)
+    // Transform the data
+    val rows =
+        businessHoursLateNight
+            .flatMap { businessHour ->
+                var firstTimeWindow = true
+                businessHour.timeWindows.mapIndexed { index, timeWindow ->
+                    val accordionDayOfWeekValue =
+                        if (firstTimeWindow) {
+                            firstTimeWindow = false
+                            convertAbbreviationToFullDay(businessHour.dayOfWeek)
+                        } else {
+                            ""
+                        }
+                    val accordionTimeWindowValue =
+                        if (index == businessHour.timeWindows.size - 1) {
+                            "${convertToConventionalTime(timeWindow.startTime)}-${convertToConventionalTime(timeWindow.endTime)}"
+                        } else {
+                            "${convertToConventionalTime(timeWindow.startTime)}-${convertToConventionalTime(timeWindow.endTime)},"
+                        }
+                    AccordionModel.Row(
+                        accordionDayOfWeek = accordionDayOfWeekValue,
+                        accordionTimeWindow = accordionTimeWindowValue
+                    )
+                }
+            }
+            .toMutableList()
+
+    // Create the AccordionModel
+    val modelTechStocks = AccordionModel(header = "Open Until PLACEHOLDER", rows = rows)
+    val group = listOf(modelTechStocks)
+
+    AccordionGroup(modifier = Modifier.padding(top = 8.dp), group = group)
 }
 
 @Composable
-fun businessNameHeader(response: BusinessHoursResponse, modifier: Modifier = Modifier) {
-    Text(text = response.locationName, modifier = modifier)
+fun BusinessNameHeader(response: BusinessHoursResponse, modifier: Modifier = Modifier) {
+    Text(text = response.locationName, modifier = modifier, onTextLayout = {})
 }
 
 @Preview(showBackground = true)
@@ -164,8 +250,38 @@ fun BusinessHoursGridScreenPreview() {
         val mockData =
             BusinessHoursResponse(
                 locationName = "Example Location",
-                hours = List(10) { Hour("$it", "", "") }
+                businessHours = List(10) { BusinessHours("$it", "", "") }
             )
         BusinessHoursGridScreen(mockData)
+    }
+}
+
+fun convertAbbreviationToFullDay(abbreviation: String): String {
+    return when (abbreviation.uppercase(Locale.ROOT)) {
+        "MON" -> "Monday"
+        "TUE" -> "Tuesday"
+        "WED" -> "Wednesday"
+        "THU" -> "Thursday"
+        "FRI" -> "Friday"
+        "SAT" -> "Saturday"
+        "SUN" -> "Sunday"
+        else -> throw IllegalArgumentException("Invalid day abbreviation: $abbreviation")
+    }
+}
+
+fun convertAbbreviationToAllCaps(abbreviation: String): String {
+    return convertAbbreviationToFullDay(abbreviation).uppercase(Locale.ROOT)
+}
+
+fun convertToConventionalTime(time24: String): String {
+    val time = LocalTime.parse(time24, DateTimeFormatter.ofPattern("HH:mm:ss"))
+
+    // If minutes value is 00, then just show the hour value, e.g. "7PM"
+    return if (time.minute == 0) {
+        time.format(DateTimeFormatter.ofPattern("ha"))
+    }
+    // If minutes value is not 00, then show both hours and minutes, e.g. "7:30PM"
+    else {
+        time.format(DateTimeFormatter.ofPattern("h:mma"))
     }
 }
