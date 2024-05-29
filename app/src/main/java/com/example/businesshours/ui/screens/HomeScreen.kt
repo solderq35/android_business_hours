@@ -39,13 +39,20 @@ import com.example.businesshours.ui.components.AccordionGroup
 import com.example.businesshours.ui.components.AccordionModel
 import com.example.businesshours.ui.theme.BusinessHoursTheme
 import java.time.DayOfWeek
+import java.time.Instant
+import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 data class TimeWindow(val startTime: String, val endTime: String, val endTimeNextDay: Boolean)
 
 data class ModifiedBusinessHour(val dayOfWeek: String, val timeWindows: List<TimeWindow>)
+
+data class TimeAndDay(val timeString: String, val dayOfWeek: String)
+
+data class NextTimeWindow(val timeWindow: TimeWindow, val dayOfWeek: String)
 
 @Composable
 fun HomeScreen(
@@ -106,6 +113,21 @@ fun BusinessHoursGridScreen(
     response: BusinessHoursResponse,
 ) {
 
+    // testcases (pst)
+    // 1716973724000 (wednesday 2:08am) -> wednesday 7am - 1pm
+    // 1716970124000 (wednesday 1:08am) -> tuesday 3pm - (wednesday) 2am
+    // 1716998924000 (wednesday 9:08am) -> wednesday 7am - 1pm
+    // 1717013324000 (wednesday 1:08pm) -> wednesday 3pm - 10pm
+    // 1717049324000 (wednesday 11:08pm) -> thursday 24h
+    // 1717023600000 (wednesday 3:00pm) -> wednesday 3pm - 10pm
+    // TODO: 24h back to back (feed in fake data local var / json)
+    // hmm: 1717196400000
+
+    val timestamp = 1717013324000 // Example timestamp in milliseconds
+    val result = convertUnixTimestampToLocalTimeStringAndDay(timestamp)
+    println("Local time in HH:mm:ss format: ${result.timeString}")
+    println("Day of the week: ${result.dayOfWeek}")
+
     // Example usage:
     val sortedBusinessHours =
         response.businessHours.sortedWith(
@@ -115,7 +137,7 @@ fun BusinessHoursGridScreen(
                 .thenBy { it.startLocalTime }
         )
 
-    println(sortedBusinessHours)
+    println("Businesshours Initial Sorting (oldest to newest): ${sortedBusinessHours}")
 
     for (hour in sortedBusinessHours) {
         println(hour)
@@ -135,7 +157,7 @@ fun BusinessHoursGridScreen(
                     }
                 ModifiedBusinessHour(dayOfWeek, timeWindows)
             }
-    println(businessHoursByDay)
+    println("Grouping sorted businesshours by day: ${businessHoursByDay}")
 
     val businessHoursLateNight = mutableListOf<ModifiedBusinessHour>()
 
@@ -144,19 +166,21 @@ fun BusinessHoursGridScreen(
         val currentHour = businessHoursByDay[i]
         val prevIndex = if (i == 0) businessHoursByDay.size - 1 else i - 1
         val nextIndex = (i + 1) % businessHoursByDay.size
-        val prevHour = businessHoursByDay[prevIndex]
-        val nextHour = businessHoursByDay[nextIndex]
+        val prevHour = businessHoursByDay[prevIndex] // TODO: rename these cause confusing (prevBusinessHours?)
+        val nextHour = businessHoursByDay[nextIndex] // TODO: rename
 
         val modifiedTimeWindows = mutableListOf<TimeWindow>()
 
         // Iterate through the time windows of the current hour
         for (currentTimeWindow in currentHour.timeWindows) {
             // If the end time of the current window is "24:00"
-            if (currentTimeWindow.endTime == "24:00:00") {
+            // TODO: test (24h vs late night, 24h back to back, etc)
+            if (currentTimeWindow.endTime == "24:00:00" && currentTimeWindow.startTime != "00:00:00") {
                 // Check if there's a next day and the next day starts at "00:00"
                 if (
                     nextHour.timeWindows.isNotEmpty() &&
-                        nextHour.timeWindows.first().startTime == "00:00:00"
+                        nextHour.timeWindows.first().startTime == "00:00:00" &&
+                        nextHour.timeWindows.first().endTime != "24:00:00"
                 ) {
                     // Modify the end time of the current window and set endTimeNextDay to true
                     modifiedTimeWindows.add(
@@ -171,11 +195,12 @@ fun BusinessHoursGridScreen(
                 }
             }
 
-            if (currentTimeWindow.startTime == "00:00:00") {
+            if (currentTimeWindow.startTime == "00:00:00" && currentTimeWindow.endTime != "24:00:00") {
                 // Check if there's a next day and the next day starts at "00:00"
                 if (
                     prevHour.timeWindows.isNotEmpty() &&
-                        prevHour.timeWindows.last().endTime == "24:00:00"
+                        prevHour.timeWindows.last().endTime == "24:00:00" &&
+                        prevHour.timeWindows.last().startTime != "00:00:00"
                 ) {
                     continue
                 }
@@ -191,7 +216,11 @@ fun BusinessHoursGridScreen(
         i++
     }
 
-    println(businessHoursLateNight)
+    println("Handling late night edge cases on businesshours grouped by day: ${businessHoursLateNight}")
+
+    val nextTimeWindow = findNextTimeWindow(businessHoursLateNight, result.timeString, result.dayOfWeek)
+    println("Next TimeWindow: $nextTimeWindow")
+
     // Transform the data
     val rows =
         businessHoursLateNight
@@ -209,6 +238,11 @@ fun BusinessHoursGridScreen(
                         if (index == businessHour.timeWindows.size - 1) {
                             "${convertToConventionalTime(timeWindow.startTime)}-${convertToConventionalTime(timeWindow.endTime)}"
                         } else {
+
+                            // If there are multiple time windows of operating hours for a given day
+                            // day, insert commas where needed.
+                            // E.g. if Tuesday has "7 AM to 1 PM" and "3 PM to 2 AM", then insert a
+                            // comma after "7 AM to 1 PM".
                             "${convertToConventionalTime(timeWindow.startTime)}-${convertToConventionalTime(timeWindow.endTime)},"
                         }
                     AccordionModel.Row(
@@ -284,4 +318,102 @@ fun convertToConventionalTime(time24: String): String {
     else {
         time.format(DateTimeFormatter.ofPattern("h:mma"))
     }
+}
+
+fun convertUnixTimestampToLocalTimeStringAndDay(timestamp: Long): TimeAndDay {
+    // Convert the Unix timestamp to LocalDateTime in the user's local timezone
+    val dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault())
+
+    // Format the LocalDateTime to HH:mm:ss
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
+    val timeString = dateTime.format(timeFormatter)
+
+    // Get the day of the week as a string
+    val dayOfWeekString = dateTime.dayOfWeek.name
+
+    return TimeAndDay(timeString, dayOfWeekString)
+}
+
+fun findNextTimeWindow(businessHours: List<ModifiedBusinessHour>, inputTimeString: String, inputDayOfWeek: String): NextTimeWindow? {
+    val inputTime = LocalTime.parse(inputTimeString, DateTimeFormatter.ofPattern("HH:mm:ss"))
+    val inputDay = inputDayOfWeek.uppercase(Locale.ROOT)
+
+    // Find the index of the input day of the week
+    val inputDayIndex = DayOfWeek.valueOf(inputDay).ordinal
+
+    println("WHYYY")
+    println(inputTime)
+    println(inputDay)
+    println(inputDayIndex)
+
+    // Iterate through the days starting from the input day
+    for (i in 0 until 7) {
+        val currentDayIndex = (inputDayIndex + i) % 7
+        val currentDay = DayOfWeek.of(currentDayIndex).name
+
+        println("HDFDFDFD")
+        println(currentDayIndex)
+        println(currentDay)
+
+        val businessHour = businessHours.find { convertAbbreviationToAllCaps(it.dayOfWeek) == currentDay }
+        if (businessHour != null) {
+            var previousEndTime: LocalTime? = null
+
+            for ((index, timeWindow) in businessHour.timeWindows.withIndex()) {
+                val startTime = LocalTime.parse(timeWindow.startTime, DateTimeFormatter.ofPattern("HH:mm:ss"))
+                val endTime = LocalTime.parse(timeWindow.endTime, DateTimeFormatter.ofPattern("HH:mm:ss"))
+
+                // test case: wednesday 1 am (1716973724000)
+                if (i == 0) {
+                    println("PLSSSSS")
+                    println(inputTime)
+                    println(timeWindow.endTimeNextDay)
+                    println(index)
+                    println(timeWindow)
+                    // println(businessHour.timeWindows[(index + 1) % businessHour.timeWindows.size])
+                    if (inputTime.isBefore(endTime) && timeWindow.endTimeNextDay) {
+                        println("BROOOdfdfd")
+                        println(timeWindow.endTimeNextDay)
+                        return NextTimeWindow(timeWindow, currentDay)
+                    }
+                    // TODO: check "reopen" logic here (e.g. tues 7am-2am(wed), wed 10am-3pm). next time window for current day (actual, not accordion row)
+                }
+                else if (i == 1) {
+                    // Check if inputTime is in one of the time windows (after startTime and before endTime for that time window), for the given day
+                    println("HKK")
+                    println(index)
+                    println(timeWindow)
+                    // println(businessHour.timeWindows[(index + 1) % businessHour.timeWindows.size])
+
+                    if (previousEndTime == null && inputTime.isBefore(startTime)) {
+                        return NextTimeWindow(timeWindow, currentDay)
+                    }
+
+                    if ((inputTime.equals(startTime) || inputTime.isAfter(startTime)) && inputTime.isBefore(endTime)) {
+                        return NextTimeWindow(timeWindow, currentDay)
+                    }
+
+                    // late night edge case handling
+                    if ((inputTime.equals(startTime) || inputTime.isAfter(startTime)) && timeWindow.endTimeNextDay) {
+                        return NextTimeWindow(timeWindow, currentDay)
+                    }
+
+                    // Check if the inputTime is between two time windows (after endTime of one time window and before startTime of another time window), for the given day
+                    if (previousEndTime != null && (inputTime.equals(previousEndTime) || inputTime.isAfter(previousEndTime)) && inputTime.isBefore(startTime)) {
+                        return NextTimeWindow(timeWindow, currentDay)
+                    }
+
+                    // Track the end time of the current time window
+                    previousEndTime = endTime
+
+                    // TODO: check "reopen" logic here (e.g. wed 7am-8am, wed 10am-3pm). next time window for current day (actual, not accordion row). should be easier than i==0 block
+                } else {
+                    // On subsequent days, return the first window
+                    return NextTimeWindow(timeWindow, currentDay)
+                }
+            }
+        }
+    }
+
+    return null
 }
