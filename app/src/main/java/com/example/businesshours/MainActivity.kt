@@ -20,9 +20,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import com.example.businesshours.ui.BusinessHoursApp
 import com.example.businesshours.ui.theme.BusinessHoursTheme
 
@@ -35,7 +40,23 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                 ) {
-                    BusinessHoursApp()
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        // Background Image
+                        Image(
+                            painter = painterResource(id = R.drawable.background),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                        // Your App Content with Translucency
+                        Box(
+                            modifier =
+                                Modifier.fillMaxSize()
+                                    .graphicsLayer(alpha = 0.9f) // Adjust alpha for translucency
+                        ) {
+                            BusinessHoursApp()
+                        }
+                    }
                 }
             }
         }
