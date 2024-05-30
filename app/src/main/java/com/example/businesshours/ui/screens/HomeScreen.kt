@@ -32,6 +32,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.businesshours.R
 import com.example.businesshours.model.BusinessHours
 import com.example.businesshours.model.BusinessHoursResponse
@@ -51,8 +52,6 @@ data class TimeWindow(val startTime: String, val endTime: String, val endTimeNex
 data class ModifiedBusinessHour(val dayOfWeek: String, val timeWindows: List<TimeWindow>)
 
 data class TimeAndDay(val timeString: String, val dayOfWeek: String)
-
-data class NextTimeWindow(val timeWindow: TimeWindow, val dayOfWeek: String)
 
 data class FlatBusinessHour(
     val dayOfWeek: String,
@@ -129,11 +128,11 @@ fun BusinessHoursGridScreen(
     // 1716998924000 (wednesday 9:08am) -> wednesday 7am - 1pm
     // 1717013324000 (wednesday 1:08pm) -> wednesday 3pm - 10pm
     // 1717049324000 (wednesday 11:08pm) -> thursday 24h
-    // 1717023600000 (wednesday 3:00pm) -> wednesday 3pm - 10pm
+    // 1717023600000 (wednesday 4:00pm) -> wednesday 3pm - 10pm
     // TODO: 24h back to back (feed in fake data local var / json)
     // 1717196400000 (Friday 4:00pm) -> tuesday 7am - 1pm
 
-    // val timestamp = 1717196400000
+    // val timestamp = 1716973724000
     val timestamp = System.currentTimeMillis()
     val result = convertUnixTimestampToLocalTimeStringAndDay(timestamp)
     println("Local time in HH:mm:ss format: ${result.timeString}")
@@ -148,95 +147,25 @@ fun BusinessHoursGridScreen(
                 .thenBy { it.startLocalTime }
         )
 
-    println("Businesshours Initial Sorting (oldest to newest): ${sortedBusinessHours}")
+    println("Businesshours Initial Sorting (oldest to newest): $sortedBusinessHours")
 
     for (hour in sortedBusinessHours) {
         println(hour)
     }
     // Convert original Hour data class to ModifiedBusinessHour
-    val businessHoursByDay =
-        sortedBusinessHours
-            .groupBy { it.dayOfWeek }
-            .map { (dayOfWeek, hours) ->
-                val timeWindows =
-                    hours.map { hour ->
-                        TimeWindow(
-                            hour.startLocalTime,
-                            hour.endLocalTime,
-                            hour.endLocalTime < hour.startLocalTime
-                        )
-                    }
-                ModifiedBusinessHour(dayOfWeek, timeWindows)
-            }
-    /*
-        println("Grouping sorted businesshours by day: ${businessHoursByDay}")
-
-        val businessHoursLateNight = mutableListOf<ModifiedBusinessHour>()
-
-        var i = 0
-        while (i < businessHoursByDay.size) {
-            val currentHour = businessHoursByDay[i]
-            val prevIndex = if (i == 0) businessHoursByDay.size - 1 else i - 1
-            val nextIndex = (i + 1) % businessHoursByDay.size
-            val prevHour =
-                businessHoursByDay[prevIndex] // TODO: rename these cause confusing (prevBusinessHours?)
-            val nextHour = businessHoursByDay[nextIndex] // TODO: rename
-
-            val modifiedTimeWindows = mutableListOf<TimeWindow>()
-
-            // Iterate through the time windows of the current hour
-            for (currentTimeWindow in currentHour.timeWindows) {
-                // If the end time of the current window is "24:00"
-                // TODO: test (24h vs late night, 24h back to back, etc)
-                if (
-                    currentTimeWindow.endTime == "24:00:00" && currentTimeWindow.startTime != "00:00:00"
-                ) {
-                    // Check if there's a next day and the next day starts at "00:00"
-                    if (
-                        nextHour.timeWindows.isNotEmpty() &&
-                            nextHour.timeWindows.first().startTime == "00:00:00" &&
-                            nextHour.timeWindows.first().endTime != "24:00:00"
-                    ) {
-                        // Modify the end time of the current window and set endTimeNextDay to true
-                        modifiedTimeWindows.add(
-                            TimeWindow(
-                                startTime = currentTimeWindow.startTime,
-                                endTime = nextHour.timeWindows.first().endTime,
-                                endTimeNextDay = true
-                            )
-                        )
-                        // Skip the next day's window
-                        continue
-                    }
+    sortedBusinessHours
+        .groupBy { it.dayOfWeek }
+        .map { (dayOfWeek, hours) ->
+            val timeWindows =
+                hours.map { hour ->
+                    TimeWindow(
+                        hour.startLocalTime,
+                        hour.endLocalTime,
+                        hour.endLocalTime < hour.startLocalTime
+                    )
                 }
-
-                if (
-                    currentTimeWindow.startTime == "00:00:00" && currentTimeWindow.endTime != "24:00:00"
-                ) {
-                    // Check if there's a next day and the next day starts at "00:00"
-                    if (
-                        prevHour.timeWindows.isNotEmpty() &&
-                            prevHour.timeWindows.last().endTime == "24:00:00" &&
-                            prevHour.timeWindows.last().startTime != "00:00:00"
-                    ) {
-                        continue
-                    }
-                }
-
-                // Add the original window if no modification needed
-                modifiedTimeWindows.add(currentTimeWindow)
-            }
-
-            // Create a new ModifiedBusinessHour object with modified time windows
-            businessHoursLateNight.add(ModifiedBusinessHour(currentHour.dayOfWeek, modifiedTimeWindows))
-
-            i++
+            ModifiedBusinessHour(dayOfWeek, timeWindows)
         }
-
-        println(
-            "Handling late night edge cases on businesshours grouped by day: ${businessHoursLateNight}"
-        )
-    */
     val flatBusinessHours = flattenBusinessHours(sortedBusinessHours)
     println(flatBusinessHours)
 
@@ -255,7 +184,11 @@ fun BusinessHoursGridScreen(
 
 @Composable
 fun BusinessNameHeader(response: BusinessHoursResponse, modifier: Modifier = Modifier) {
-    Text(text = response.locationName, modifier = modifier, onTextLayout = {})
+    Text(
+        text = response.locationName,
+        fontSize = 24.sp, // Increase text size
+        modifier = modifier
+    )
 }
 
 @Preview(showBackground = true)
@@ -347,6 +280,8 @@ fun flattenBusinessHours(sortedBusinessHours: List<BusinessHours>): List<FlatBus
         println(nextHour)
         println(prevHour)
 
+        // TODO: remove cause it's relative to the user's time, not between time windows like
+        // this...
         val secondsGapVal =
             computeTimeDifference(
                 currentHour.endLocalTime,
@@ -355,6 +290,7 @@ fun flattenBusinessHours(sortedBusinessHours: List<BusinessHours>): List<FlatBus
                 convertAbbreviationToAllCaps(nextHour.dayOfWeek)
             )
         println("SECONDS TIME DIFF WINDOW: $secondsGapVal")
+        // TODO: handle 2am edge case (endTimeNextDay)
         val daysGapVal =
             daysBetween(
                 convertAbbreviationToAllCaps(currentHour.dayOfWeek),
@@ -452,7 +388,7 @@ fun transformToAccordionRows(flatBusinessHours: List<FlatBusinessHour>): List<Ac
 }
 
 fun dayOfWeekToNumber(day: String): Long {
-    return when (day.toUpperCase()) {
+    return when (day.uppercase(Locale.ROOT)) {
         "MONDAY" -> 1
         "TUESDAY" -> 2
         "WEDNESDAY" -> 3
@@ -484,8 +420,8 @@ fun computeTimeDifference(time1: String, day1: String, time2: String, day2: Stri
 }
 
 fun daysBetween(firstDay: String, secondDay: String): Int {
-    val firstDayOfWeek = DayOfWeek.valueOf(firstDay.toUpperCase())
-    val secondDayOfWeek = DayOfWeek.valueOf(secondDay.toUpperCase())
+    val firstDayOfWeek = DayOfWeek.valueOf(firstDay.uppercase(Locale.ROOT))
+    val secondDayOfWeek = DayOfWeek.valueOf(secondDay.uppercase(Locale.ROOT))
 
     val daysElapsed = secondDayOfWeek.ordinal - firstDayOfWeek.ordinal
     return if (daysElapsed >= 0) daysElapsed else daysElapsed + 7
@@ -504,92 +440,94 @@ fun findNextTimeWindow(
 
     println("WHYYY")
     println(inputTime)
+    println(inputTimeString)
     println(inputDay)
     println(inputDayIndex)
 
-    // Iterate through the days starting from the input day
-    for (i in 0 until 7) {
-        val currentDayIndex = (inputDayIndex + i) % 7
-        val currentDay = DayOfWeek.of(currentDayIndex).name
-
-        println("HDFDFDFD")
-        println(currentDayIndex)
-        println(currentDay)
-
-        val dayBusinessHours =
-            flatBusinessHours.filter { convertAbbreviationToAllCaps(it.dayOfWeek) == currentDay }
-        println("homieEE")
-        println(dayBusinessHours)
-        // if (dayBusinessHours.isNotEmpty()) {
-        var previousEndTime: LocalTime? = null
+    for (i in 0 until 2) {
 
         for ((index, timeWindow) in flatBusinessHours.withIndex()) {
             val startTime =
                 LocalTime.parse(timeWindow.startTime, DateTimeFormatter.ofPattern("HH:mm:ss"))
             val endTime =
                 LocalTime.parse(timeWindow.endTime, DateTimeFormatter.ofPattern("HH:mm:ss"))
+            val dayOfWeekEnum =
+                DayOfWeek.valueOf(convertAbbreviationToAllCaps(timeWindow.dayOfWeek))
+            val endDay = if (timeWindow.endTimeNextDay) dayOfWeekEnum.plus(1) else dayOfWeekEnum
 
-            if (i == 0) {
-                println("PLSSSSS")
-                println(inputTime)
-                println(timeWindow.endTimeNextDay)
-                println(index)
-                println(timeWindow)
-                println(flatBusinessHours[(index + 1) % flatBusinessHours.size])
-                if (inputTime.isBefore(endTime) && timeWindow.endTimeNextDay) {
-                    println("BROOOdfdfd")
-                    println(timeWindow.endTimeNextDay)
-                    return "Open until ${convertToConventionalTime(timeWindow.endTime)}"
-                }
-            } else {
-                println("geronimOOO")
-                println(timeWindow)
-                println(flatBusinessHours[(index + 1) % flatBusinessHours.size])
-
-                // for "reopen", remember only need to check current day (endTimeNextDay aside)
-                val difference =
+            val difference1 =
+                kotlin.math.abs(
                     computeTimeDifference(
-                        timeWindow.endTime,
-                        convertAbbreviationToAllCaps(timeWindow.dayOfWeek),
+                        inputTimeString,
+                        inputDay,
                         flatBusinessHours[(index + 1) % flatBusinessHours.size].startTime,
                         convertAbbreviationToAllCaps(
                             flatBusinessHours[(index + 1) % flatBusinessHours.size].dayOfWeek
                         )
                     )
+                )
 
-                println(difference)
+            println("PLSSSSS")
+            println(difference1)
+            println(inputTime)
+            println(timeWindow.endTimeNextDay)
+            println(index)
+            println(timeWindow)
+            println(flatBusinessHours[(index + 1) % flatBusinessHours.size])
+            if (i == 0) {
 
-                if (previousEndTime == null && inputTime.isBefore(startTime)) {
-                    return "Opens at ${convertToConventionalTime(timeWindow.startTime)}"
+                if (timeWindow.endTimeNextDay) {
+                    if (
+                        ((inputTime.equals(startTime) || inputTime.isAfter(startTime)) &&
+                            dayOfWeekEnum == DayOfWeek.valueOf(inputDay)) ||
+                            (inputTime.isBefore(endTime) && endDay == DayOfWeek.valueOf(inputDay))
+                    ) {
+                        println(
+                            "currently in a time window, next time window in $timeWindow.daysUntilNextTimeWindow day"
+                        )
+                        if (timeWindow.daysUntilNextTimeWindow == 0) {
+                            return "Open until ${convertToConventionalTime(timeWindow.endTime)}"
+                        } else if (timeWindow.daysUntilNextTimeWindow > 0) {
+                            return if (difference1 > 86400) {
+                                "Open until ${convertToConventionalTime(timeWindow.endTime)}, reopens at ${convertAbbreviationToFullDay(timeWindow.dayOfWeek)}, ${convertToConventionalTime(flatBusinessHours[(index + 1) % flatBusinessHours.size].startTime)}"
+                            } else {
+                                "Open until ${convertToConventionalTime(timeWindow.endTime)}, reopens at ${convertToConventionalTime(flatBusinessHours[(index + 1) % flatBusinessHours.size].startTime)}"
+                            }
+                        }
+                    }
+                } else {
+                    println("BOIIIII")
+                    println(dayOfWeekEnum)
+                    println(endDay)
+                    println(DayOfWeek.valueOf(inputDay))
+                    if (
+                        ((inputTime.equals(startTime) || inputTime.isAfter(startTime)) &&
+                            dayOfWeekEnum == DayOfWeek.valueOf(inputDay)) &&
+                            (inputTime.isBefore(endTime) && endDay == DayOfWeek.valueOf(inputDay))
+                    ) {
+                        println(
+                            "currently in a time window, next time window in $timeWindow.daysUntilNextTimeWindow day"
+                        )
+                        if (timeWindow.daysUntilNextTimeWindow == 0) {
+                            return "Open until ${convertToConventionalTime(timeWindow.endTime)}"
+                        } else if (timeWindow.daysUntilNextTimeWindow > 0) {
+                            return if (difference1 > 86400) {
+                                "Open until ${convertToConventionalTime(timeWindow.endTime)}, reopens at ${convertAbbreviationToFullDay(timeWindow.dayOfWeek)}, ${convertToConventionalTime(flatBusinessHours[(index + 1) % flatBusinessHours.size].startTime)}"
+                            } else {
+                                "Open until ${convertToConventionalTime(timeWindow.endTime)}, reopens at ${convertToConventionalTime(flatBusinessHours[(index + 1) % flatBusinessHours.size].startTime)}"
+                            }
+                        }
+                    }
                 }
-
-                if (
-                    (inputTime.equals(startTime) || inputTime.isAfter(startTime)) &&
-                        inputTime.isBefore(endTime)
-                ) {
-                    // TODO: Handle reopen
-                    return "Open until ${convertToConventionalTime(timeWindow.endTime)}"
+            }
+            if (i == 1) {
+                return if (difference1 > 86400) {
+                    "Opens ${convertAbbreviationToFullDay(timeWindow.dayOfWeek)}, ${convertToConventionalTime(timeWindow.startTime)}"
+                } else {
+                    "Opens again at ${convertToConventionalTime(timeWindow.startTime)}"
                 }
-
-                if (
-                    (inputTime.equals(startTime) || inputTime.isAfter(startTime)) &&
-                        timeWindow.endTimeNextDay
-                ) {
-                    return "Open until ${convertToConventionalTime(timeWindow.endTime)}"
-                }
-
-                if (
-                    previousEndTime != null &&
-                        (inputTime.equals(previousEndTime) || inputTime.isAfter(previousEndTime)) &&
-                        inputTime.isBefore(startTime)
-                ) {
-                    return "Opens again at ${convertToConventionalTime(timeWindow.startTime)}"
-                }
-
-                previousEndTime = endTime
             }
         }
-        //  }
     }
 
     return null
