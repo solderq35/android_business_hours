@@ -17,13 +17,11 @@
 
 **General Assumptions**
 
-- all days from api endpoint would be in "first 3 letters of day of week name" format?
-- safe to reorder by day?
+- all days from api endpoint would be in "first 3 letters of day of week name" format
 - all events happen same each week
 - local timezone on user matches server
 - am pm final format (confirmed by figma)
-- match actual restaurant business hours format for end user (needs market research)
-  - see: Superette corvallis on google maps mobile (e.g. "8 am to 2 am")
+- when in doubt, check how google maps mobile app does the UI
 
 ## Test Cases
 Edit `val timestamp` in `app\src\main\java\com\example\businesshours\ui\screens\HomeScreen.kt`
@@ -36,3 +34,6 @@ See https://www.unixtimestamp.com/index.php to convert Unix for debug
 - 1717023600000 (wednesday 4:00pm) -> wednesday 3pm - 10pm
 - TODO: 24h back to back (feed in fake data local var / json)
 - 1717196400000 (Friday 4:00pm) -> tuesday 7am - 1pm
+
+## Screenshot
+![](https://github-production-user-asset-6210df.s3.amazonaws.com/82061589/335072139-cd64b0ad-78f6-4cfb-8c6b-0647b2d10dad.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20240530%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240530T065247Z&X-Amz-Expires=300&X-Amz-Signature=db5a51f17b881abfe4a31c52c81a20a9666bcfbde0fd98c3d5784ac106bc42ab&X-Amz-SignedHeaders=host&actor_id=82061589&key_id=0&repo_id=804817281)
