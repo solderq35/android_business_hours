@@ -16,24 +16,29 @@
 ## Assumptions
 
 **General Assumptions**
-
-- all days from api endpoint would be in "first 3 letters of day of week name" format
-- all events happen same each week
-- local timezone on user matches server
-- am pm final format (confirmed by figma)
-- when in doubt, check how google maps mobile app does the UI
+- All days from API endpoint will be in "first 3 letters of day of week name" format (e.g. "TUE")
+- All time of day from API endpoint will be in HH:mm:ss format (e.g. "07:00:00")
+- For "Open until {time}, reopens at {next time block}", I only show "reopens at..." if the next time block is on the same day
+- All events happen same each week (holidays etc out of scope)
+- Local timezone on user matches server
+- Caching requests from API endpoint is out of scope
+- Didn't have time to implement refresh functionality, so recompile app if testing custom timestamps etc
+- When in doubt, check how google maps mobile app does the UI
 
 ## Test Cases
 Edit `val timestamp` in `app\src\main\java\com\example\businesshours\ui\screens\HomeScreen.kt`
-See https://www.unixtimestamp.com/index.php to convert Unix for debug
-- 1716973724000 (wednesday 2:08am) -> wednesday 7am - 1pm
-- 1716970124000 (wednesday 1:08am) -> tuesday 3pm - (wednesday) 2am
-- 1716998924000 (wednesday 9:08am) -> wednesday 7am - 1pm
-- 1717013324000 (wednesday 1:08pm) -> wednesday 3pm - 10pm
-- 1717049324000 (wednesday 11:08pm) -> thursday 24h
-- 1717023600000 (wednesday 4:00pm) -> wednesday 3pm - 10pm
-- TODO: 24h back to back (feed in fake data local var / json)
-- 1717196400000 (Friday 4:00pm) -> tuesday 7am - 1pm
+See https://www.unixtimestamp.com/index.php to convert Unix timestamps for debug.
+Below Unix timestamps were tested for PST.
+-  see https://www.unixtimestamp.com/index.php to convert Unix for debug
+-  1716973724 (wednesday 2:08am) -> wednesday 7am - 1pm, "opens again at 7 AM", red dot
+-  1716970124 (wednesday 1:08am) -> tuesday 3pm - (wednesday) 2am, "Open until 2AM", yellow dot
+-  1716998924 (wednesday 9:08am) -> wednesday 7am - 1pm, "Open until 1PM, reopens at 3PM", green
+-  dot
+-  1717013324 (wednesday 1:08pm) -> Wednesday 3pm - 10pm, "Opens again at 12 AM", red dot
+-  1717042085 (wednesday 9:08 pm) -> wednesday 3pm - 10pm, "Open until 10PM", yellow dot
+-  1717049324 (wednesday 11:08pm) -> thursday 24h, "Opens again at 7 M", red dot
+-  1717023600 (wednesday 4:00pm) -> wednesday 3pm - 10pm, "Open until 10 PM", green dot
+-  1717196400 (Friday 4:00pm) -> N/A (no time block for Friday), "Opens Tuesday 7 AM", red dot
 
 ## Screenshot
-![](https://github-production-user-asset-6210df.s3.amazonaws.com/82061589/335072139-cd64b0ad-78f6-4cfb-8c6b-0647b2d10dad.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20240530%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240530T065247Z&X-Amz-Expires=300&X-Amz-Signature=db5a51f17b881abfe4a31c52c81a20a9666bcfbde0fd98c3d5784ac106bc42ab&X-Amz-SignedHeaders=host&actor_id=82061589&key_id=0&repo_id=804817281)
+![image](https://github.com/solderq35/android_business_hours/assets/82061589/2bde7ea7-5440-41eb-85ac-0d170b24bce6)
