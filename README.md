@@ -41,4 +41,4 @@ Below Unix timestamps were tested for PST.
 -  1717196400 (Friday 4:00pm) -> N/A (no time block for Friday), "Opens Tuesday 7 AM", red dot
 
 ## Screenshot
-![image](https://github.com/solderq35/android_business_hours/assets/82061589/2bde7ea7-5440-41eb-85ac-0d170b24bce6)
+![image](https://github.com/solderq35/android_business_hours/assets/82061589/310de71b-ea48-4359-b71e-36165258d9c9)
