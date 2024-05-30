@@ -265,46 +265,41 @@ fun flattenBusinessHours(sortedBusinessHours: List<BusinessHours>): List<FlatBus
 
     var i = 0
     while (i < sortedBusinessHours.size) {
-        val currentHour = sortedBusinessHours[i]
+        val currentTimeBlock = sortedBusinessHours[i]
         val prevIndex = if (i == 0) sortedBusinessHours.size - 1 else i - 1
         val nextIndex = (i + 1) % sortedBusinessHours.size
-        val prevHour = sortedBusinessHours[prevIndex]
-        val nextHour = sortedBusinessHours[nextIndex]
+        val prevTimeBlock = sortedBusinessHours[prevIndex]
+        val nextTimeBlock = sortedBusinessHours[nextIndex]
 
         val modifiedTimeWindows = mutableListOf<Pair<String, String>>()
 
-        val currentTimeWindow = Pair(currentHour.startLocalTime, currentHour.endLocalTime)
-        println("WINDOWSSSS")
-        println(currentTimeWindow)
-        println(currentHour)
-        println(nextHour)
-        println(prevHour)
+        val currentTimeWindow = Pair(currentTimeBlock.startLocalTime, currentTimeBlock.endLocalTime)
 
         // TODO: remove cause it's relative to the user's time, not between time windows like
         // this...
         val secondsGapVal =
             computeTimeDifference(
-                currentHour.endLocalTime,
-                convertAbbreviationToAllCaps(currentHour.dayOfWeek),
-                nextHour.startLocalTime,
-                convertAbbreviationToAllCaps(nextHour.dayOfWeek)
+                currentTimeBlock.endLocalTime,
+                convertAbbreviationToAllCaps(currentTimeBlock.dayOfWeek),
+                nextTimeBlock.startLocalTime,
+                convertAbbreviationToAllCaps(nextTimeBlock.dayOfWeek)
             )
         println("SECONDS TIME DIFF WINDOW: $secondsGapVal")
         // TODO: handle 2am edge case (endTimeNextDay)
         val daysGapVal =
             daysBetween(
-                convertAbbreviationToAllCaps(currentHour.dayOfWeek),
-                convertAbbreviationToAllCaps(nextHour.dayOfWeek)
+                convertAbbreviationToAllCaps(currentTimeBlock.dayOfWeek),
+                convertAbbreviationToAllCaps(nextTimeBlock.dayOfWeek)
             )
         println("DAYS UNTIL NEXT TIME WINDOW: $daysGapVal")
 
         if (currentTimeWindow.second == "24:00:00" && currentTimeWindow.first != "00:00:00") {
             if (
-                nextHour.startLocalTime == "00:00:00" &&
-                    nextHour.endLocalTime != "24:00:00" &&
+                nextTimeBlock.startLocalTime == "00:00:00" &&
+                    nextTimeBlock.endLocalTime != "24:00:00" &&
                     daysGapVal == 1
             ) {
-                modifiedTimeWindows.add(Pair(currentTimeWindow.first, nextHour.endLocalTime))
+                modifiedTimeWindows.add(Pair(currentTimeWindow.first, nextTimeBlock.endLocalTime))
             } else {
                 modifiedTimeWindows.add(currentTimeWindow)
             }
@@ -312,8 +307,8 @@ fun flattenBusinessHours(sortedBusinessHours: List<BusinessHours>): List<FlatBus
             currentTimeWindow.first == "00:00:00" && currentTimeWindow.second != "24:00:00"
         ) {
             if (
-                !(prevHour.endLocalTime == "24:00:00" && prevHour.startLocalTime != "00:00:00") &&
-                    daysGapVal == 1
+                !(prevTimeBlock.endLocalTime == "24:00:00" &&
+                    prevTimeBlock.startLocalTime != "00:00:00") && daysGapVal == 1
             ) {
                 // Skip adding this window
                 modifiedTimeWindows.add(currentTimeWindow)
@@ -328,11 +323,11 @@ fun flattenBusinessHours(sortedBusinessHours: List<BusinessHours>): List<FlatBus
         for (timeWindow in modifiedTimeWindows) {
             val endTimeNextDay =
                 timeWindow.second != "24:00:00" &&
-                    nextHour.startLocalTime == "00:00:00" &&
-                    nextHour.endLocalTime != "24:00:00"
+                    nextTimeBlock.startLocalTime == "00:00:00" &&
+                    nextTimeBlock.endLocalTime != "24:00:00"
             flatList.add(
                 FlatBusinessHour(
-                    dayOfWeek = currentHour.dayOfWeek,
+                    dayOfWeek = currentTimeBlock.dayOfWeek,
                     startTime = timeWindow.first,
                     endTime = timeWindow.second,
                     endTimeNextDay = endTimeNextDay,
@@ -343,14 +338,14 @@ fun flattenBusinessHours(sortedBusinessHours: List<BusinessHours>): List<FlatBus
             val timeDiff =
                 computeTimeDifference(
                     timeWindow.second,
-                    convertAbbreviationToFullDay(currentHour.dayOfWeek),
-                    nextHour.startLocalTime,
-                    convertAbbreviationToFullDay(nextHour.dayOfWeek)
+                    convertAbbreviationToFullDay(currentTimeBlock.dayOfWeek),
+                    nextTimeBlock.startLocalTime,
+                    convertAbbreviationToFullDay(nextTimeBlock.dayOfWeek)
                 )
             println("TIME DIFF: $timeDiff")
             println(timeWindow)
-            println(currentHour)
-            println(nextHour)
+            println(currentTimeBlock)
+            println(nextTimeBlock)
         }
 
         i++
@@ -438,12 +433,6 @@ fun findNextTimeWindow(
     // Find the index of the input day of the week
     val inputDayIndex = DayOfWeek.valueOf(inputDay).ordinal
 
-    println("WHYYY")
-    println(inputTime)
-    println(inputTimeString)
-    println(inputDay)
-    println(inputDayIndex)
-
     for (i in 0 until 2) {
 
         for ((index, timeWindow) in flatBusinessHours.withIndex()) {
@@ -467,13 +456,6 @@ fun findNextTimeWindow(
                     )
                 )
 
-            println("PLSSSSS")
-            println(difference1)
-            println(inputTime)
-            println(timeWindow.endTimeNextDay)
-            println(index)
-            println(timeWindow)
-            println(flatBusinessHours[(index + 1) % flatBusinessHours.size])
             if (i == 0) {
 
                 if (timeWindow.endTimeNextDay) {
@@ -496,10 +478,6 @@ fun findNextTimeWindow(
                         }
                     }
                 } else {
-                    println("BOIIIII")
-                    println(dayOfWeekEnum)
-                    println(endDay)
-                    println(DayOfWeek.valueOf(inputDay))
                     if (
                         ((inputTime.equals(startTime) || inputTime.isAfter(startTime)) &&
                             dayOfWeekEnum == DayOfWeek.valueOf(inputDay)) &&
