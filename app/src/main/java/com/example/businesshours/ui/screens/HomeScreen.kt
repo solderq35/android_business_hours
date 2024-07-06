@@ -49,10 +49,6 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-data class TimeWindow(val startTime: String, val endTime: String, val endTimeNextDay: Boolean)
-
-data class ModifiedBusinessHour(val dayOfWeek: String, val timeWindows: List<TimeWindow>)
-
 data class TimeAndDay(val timeString: String, val dayOfWeek: String)
 
 data class TimeWindowResult(val timeWindow: String?, val color: Color)
@@ -127,17 +123,17 @@ fun BusinessHoursGridScreen(
     // testcases (pst)
     // TODO: 24h back to back (feed in fake data local var / json)
     // see https://www.unixtimestamp.com/index.php to convert Unix for debug
-    // 1716973724 (wednesday 2:08am) -> wednesday 7am - 1pm, "opens again at 7 AM", red dot
-    // 1716970124 (wednesday 1:08am) -> tuesday 3pm - (wednesday) 2am, "Open until 2AM", yellow dot
-    // 1716998924 (wednesday 9:08am) -> wednesday 7am - 1pm, "Open until 1PM, reopens at 3PM", green
+    // 1716970124 (wednesday 1:08am) -> Tuesday 3pm - (wednesday) 2am, "Open until 2AM", yellow dot
+    // 1716973724 (wednesday 2:08am) -> Wednesday 7am - 1pm, "opens again at 7 AM", red dot
+    // 1716998924 (wednesday 9:08am) -> Wednesday 7am - 1pm, "Open until 1PM, reopens at 3PM", green
     // dot
     // 1717013324 (wednesday 1:08pm) -> Wednesday 3pm - 10pm, "Opens again at 12 AM", red dot
-    // 1717042085 (wednesday 9:08 pm) -> wednesday 3pm - 10pm, "Open until 10PM", yellow dot
-    // 1717049324 (wednesday 11:08pm) -> thursday 24h, "Opens again at 7 M", red dot
-    // 1717023600 (wednesday 4:00pm) -> wednesday 3pm - 10pm, "Open until 10 PM", green dot
+    // 1717042085 (wednesday 9:08 pm) -> Wednesday 3pm - 10pm, "Open until 10PM", yellow dot
+    // 1717049324 (wednesday 11:08pm) -> Thursday 24h, "Opens again at 7 M", red dot
+    // 1717023600 (wednesday 4:00pm) -> Wednesday 3pm - 10pm, "Open until 10 PM", green dot
+    // 1717052342 (Thursday 11:59 PM) -> Thursday 24h
     // 1717196400 (Friday 4:00pm) -> N/A (no time block for Friday), "Opens Tuesday 7 AM", red dot
 
-    // val timestamp = 1716973724
     val timestamp = (System.currentTimeMillis() / 1000).toInt()
     println("TIMESTAMP: $timestamp")
     val result = convertUnixTimestampToLocalTimeStringAndDay(timestamp)
@@ -154,21 +150,6 @@ fun BusinessHoursGridScreen(
         )
 
     println("Businesshours Initial Sorting (oldest to newest): $sortedBusinessHours")
-
-    // Convert original Hour data class to ModifiedBusinessHour
-    sortedBusinessHours
-        .groupBy { it.dayOfWeek }
-        .map { (dayOfWeek, hours) ->
-            val timeWindows =
-                hours.map { hour ->
-                    TimeWindow(
-                        hour.startLocalTime,
-                        hour.endLocalTime,
-                        hour.endLocalTime < hour.startLocalTime
-                    )
-                }
-            ModifiedBusinessHour(dayOfWeek, timeWindows)
-        }
     val flatBusinessHours = flattenBusinessHours(sortedBusinessHours)
     println("flattened business hours: $flatBusinessHours")
 
@@ -521,7 +502,6 @@ fun findNextTimeWindow(
         val finalHeaderColor = Color.Red
         return TimeWindowResult(finalHeaderText, finalHeaderColor)
     } else if (minDiff in 0..86400) {
-        println("ERERE")
         println(minTimeOfDay)
         val finalHeaderText = "Opens again at ${convertToConventionalTime(minTimeOfDay)}"
         val finalHeaderColor = Color.Red
